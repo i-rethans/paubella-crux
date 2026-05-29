@@ -274,7 +274,42 @@
       }
     }
 
+    function selectWord(row, col) {
+      const sameCell = state.lastClickedCell &&
+        state.lastClickedCell.row === row && state.lastClickedCell.col === col;
+
+      let direction = state.direction;
+
+      if (sameCell) {
+        const toggled = direction === 'horizontal' ? 'vertical' : 'horizontal';
+        if (findWordAt(row, col, toggled)) {
+          direction = toggled;
+        }
+      }
+
+      let word = findWordAt(row, col, direction);
+      if (!word) {
+        const other = direction === 'horizontal' ? 'vertical' : 'horizontal';
+        word = findWordAt(row, col, other);
+        if (word) direction = other;
+      }
+
+      if (!word) return;
+
+      state.direction = direction;
+      state.selectedWord = word;
+      state.cursorCell = firstEmptyCell(word, { row, col });
+      state.lastClickedCell = { row, col };
+      updateHighlighting();
+    }
+
     renderGrid(puzzle);
+
+    document.getElementById('grid-container').addEventListener('click', (e) => {
+      const cell = e.target.closest('.cell-white');
+      if (!cell) return;
+      selectWord(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
+    });
   </script>
 </body>
 </html>
