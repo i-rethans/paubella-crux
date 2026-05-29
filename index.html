@@ -167,56 +167,175 @@
     </div>
   </main>
   <script>
+    function parseGrid(textRows) {
+      return {
+        grid: textRows.map(row =>
+          [...row].map(ch => ch === '#' ? null : '')
+        ),
+        solution: textRows.map(row =>
+          [...row].map(ch => ch === '#' ? null : ch)
+        ),
+      };
+    }
+
+    function detectWords(grid, rows, cols) {
+      const words = [];
+      for (let r = 0; r < rows; r++) {
+        let start = null;
+        for (let c = 0; c <= cols; c++) {
+          if (c < cols && grid[r][c] !== null) {
+            if (start === null) start = c;
+          } else {
+            if (start !== null && c - start >= 2) {
+              words.push({ direction: 'horizontal', row: r, col: start, length: c - start });
+            }
+            start = null;
+          }
+        }
+      }
+      for (let c = 0; c < cols; c++) {
+        let start = null;
+        for (let r = 0; r <= rows; r++) {
+          if (r < rows && grid[r][c] !== null) {
+            if (start === null) start = r;
+          } else {
+            if (start !== null && r - start >= 2) {
+              words.push({ direction: 'vertical', row: start, col: c, length: r - start });
+            }
+            start = null;
+          }
+        }
+      }
+      return words;
+    }
+
+    function assignNumbers(words) {
+      const starts = new Map();
+      let num = 1;
+      const sorted = [...words].sort((a, b) => a.row - b.row || a.col - b.col);
+      for (const word of sorted) {
+        const key = `${word.row},${word.col}`;
+        if (!starts.has(key)) {
+          starts.set(key, num++);
+        }
+        word.number = starts.get(key);
+      }
+      return sorted;
+    }
+
+    function buildClues(numberedWords, clueTexts) {
+      const clues = { horizontal: [], vertical: [] };
+      for (const word of numberedWords) {
+        const text = clueTexts[word.direction][word.number];
+        if (!text) {
+          console.error(`Missing clue: ${word.direction} ${word.number} at (${word.row},${word.col}), length ${word.length}`);
+          continue;
+        }
+        clues[word.direction].push({
+          number: word.number,
+          row: word.row,
+          col: word.col,
+          length: word.length,
+          direction: word.direction,
+          clue: text,
+        });
+      }
+      return clues;
+    }
+
+    function validatePuzzle(puzzle) {
+      const errors = [];
+
+      if (puzzle.grid.length !== puzzle.rows) {
+        errors.push(`Grid has ${puzzle.grid.length} rows, expected ${puzzle.rows}`);
+      }
+      if (!puzzle.grid.every(row => row.length === puzzle.cols)) {
+        errors.push(`Not all grid rows have ${puzzle.cols} columns`);
+      }
+      if (puzzle.solution.length !== puzzle.rows) {
+        errors.push(`Solution has ${puzzle.solution.length} rows, expected ${puzzle.rows}`);
+      }
+      if (!puzzle.solution.every(row => row.length === puzzle.cols)) {
+        errors.push(`Not all solution rows have ${puzzle.cols} columns`);
+      }
+
+      for (let r = 0; r < puzzle.rows; r++) {
+        for (let c = 0; c < puzzle.cols; c++) {
+          const gridBlack = puzzle.grid[r][c] === null;
+          const solBlack = puzzle.solution[r][c] === null;
+          if (gridBlack !== solBlack) {
+            errors.push(`Black cell mismatch at (${r},${c})`);
+          }
+          if (!solBlack && !/^[A-Z]$/.test(puzzle.solution[r][c])) {
+            errors.push(`Invalid solution character "${puzzle.solution[r][c]}" at (${r},${c})`);
+          }
+        }
+      }
+
+      const detected = assignNumbers(detectWords(puzzle.grid, puzzle.rows, puzzle.cols));
+      const allClues = [...puzzle.clues.horizontal, ...puzzle.clues.vertical];
+
+      for (const word of detected) {
+        const clue = allClues.find(c =>
+          c.direction === word.direction && c.row === word.row && c.col === word.col
+        );
+        if (!clue) {
+          errors.push(`No clue for ${word.direction} word at (${word.row},${word.col}), length ${word.length}, expected number ${word.number}`);
+        } else if (clue.length !== word.length) {
+          errors.push(`Length mismatch for ${word.direction} ${clue.number}: clue says ${clue.length}, grid has ${word.length}`);
+        } else if (clue.number !== word.number) {
+          errors.push(`Number mismatch at (${word.row},${word.col}): clue says ${clue.number}, expected ${word.number}`);
+        }
+      }
+
+      for (const clue of allClues) {
+        const match = detected.find(w =>
+          w.direction === clue.direction && w.row === clue.row && w.col === clue.col
+        );
+        if (!match) {
+          errors.push(`Orphan clue: ${clue.direction} ${clue.number} at (${clue.row},${clue.col}) has no matching word in grid`);
+        }
+      }
+
+      if (errors.length > 0) {
+        console.error('Puzzle validation failed:');
+        errors.forEach(e => console.error('  ' + e));
+      } else {
+        console.log('Puzzle data validated OK');
+      }
+      return errors.length === 0;
+    }
+
+    const { grid, solution } = parseGrid([
+      '#KAT#',
+      'BOS##',
+      '#E###',
+      '#KAAS',
+      '#####',
+    ]);
+
     const puzzle = {
       rows: 5,
       cols: 5,
-      grid: [
-        [null, "",   "",   "",   null],
-        ["",   "",   "",   null, null],
-        [null, "",   null, null, null],
-        [null, "",   "",   "",   ""  ],
-        [null, null, null, null, null],
-      ],
-      solution: [
-        [null, "K", "A", "T", null],
-        ["B",  "O", "S", null, null],
-        [null, "E", null, null, null],
-        [null, "K", "A", "A", "S"],
-        [null, null, null, null, null],
-      ],
-      clues: {
-        horizontal: [
-          { number: 1, row: 0, col: 1, length: 3, clue: "Huisdier dat spint" },
-          { number: 3, row: 1, col: 0, length: 3, clue: "Gebied met veel bomen" },
-          { number: 4, row: 3, col: 1, length: 4, clue: "Zuivelproduct uit Gouda" },
-        ],
-        vertical: [
-          { number: 1, row: 0, col: 1, length: 4, clue: "Gebak, vaak met glazuur" },
-          { number: 2, row: 0, col: 2, length: 2, clue: "Restant na verbranding" },
-        ],
-      },
+      grid,
+      solution,
+      clues: buildClues(
+        assignNumbers(detectWords(grid, 5, 5)),
+        {
+          horizontal: {
+            1: 'Huisdier dat spint',
+            3: 'Gebied met veel bomen',
+            4: 'Zuivelproduct uit Gouda',
+          },
+          vertical: {
+            1: 'Gebak, vaak met glazuur',
+            2: 'Restant na verbranding',
+          },
+        }
+      ),
     };
 
-    console.assert(puzzle.grid.length === puzzle.rows,
-      `Grid has ${puzzle.grid.length} rows, expected ${puzzle.rows}`);
-    console.assert(puzzle.grid.every(row => row.length === puzzle.cols),
-      `Not all grid rows have ${puzzle.cols} columns`);
-    console.assert(puzzle.solution.length === puzzle.rows,
-      `Solution has ${puzzle.solution.length} rows, expected ${puzzle.rows}`);
-    console.assert(puzzle.solution.every(row => row.length === puzzle.cols),
-      `Not all solution rows have ${puzzle.cols} columns`);
-    for (let r = 0; r < puzzle.rows; r++) {
-      for (let c = 0; c < puzzle.cols; c++) {
-        const isBlackGrid = puzzle.grid[r][c] === null;
-        const isBlackSolution = puzzle.solution[r][c] === null;
-        console.assert(isBlackGrid === isBlackSolution,
-          `Black cell mismatch at (${r},${c})`);
-      }
-    }
-    console.log("Puzzle data validated OK");
-
-    for (const clue of puzzle.clues.horizontal) clue.direction = 'horizontal';
-    for (const clue of puzzle.clues.vertical) clue.direction = 'vertical';
+    validatePuzzle(puzzle);
 
     const state = {
       direction: 'horizontal',
