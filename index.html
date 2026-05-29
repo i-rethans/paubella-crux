@@ -414,6 +414,14 @@
       updateHighlighting();
     }
 
+    function selectClue(clue) {
+      state.direction = clue.direction;
+      state.selectedWord = clue;
+      state.cursorCell = firstEmptyCell(clue, { row: clue.row, col: clue.col });
+      state.lastClickedCell = null;
+      updateHighlighting();
+    }
+
     function placeLetter(letter) {
       const { row, col } = state.cursorCell;
       state.gridLetters[row][col] = letter;
@@ -467,6 +475,15 @@
 
     renderGrid(puzzle);
     renderClues(puzzle);
+
+    document.getElementById('clues-container').addEventListener('click', (e) => {
+      const item = e.target.closest('.clue-item');
+      if (!item) return;
+      const direction = item.dataset.direction;
+      const number = parseInt(item.dataset.number);
+      const clue = puzzle.clues[direction].find(c => c.number === number);
+      if (clue) selectClue(clue);
+    });
 
     document.getElementById('grid-container').addEventListener('click', (e) => {
       const cell = e.target.closest('.cell-white');
