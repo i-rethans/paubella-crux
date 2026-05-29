@@ -1,932 +1,1101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crux</title>
-  <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #faf7f2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    header {
-      margin-bottom: 1.5rem;
-    }
-
-    h1 {
-      font-family: Georgia, serif;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: #2c2420;
-    }
-
-    .subtitle {
-      font-size: 0.85rem;
-      color: #a08060;
-      text-align: center;
-      margin-top: 0.25rem;
-    }
-
-    main {
-      display: flex;
-      gap: 2rem;
-    }
-
-    #grid-container {
-      display: grid;
-      gap: 0;
-      border: 2px solid #2c2420;
-      background: #2c2420;
-      width: fit-content;
-    }
-
-    .cell {
-      width: 44px;
-      height: 44px;
-      position: relative;
-      border: 1px solid #2c2420;
-    }
-
-    .cell-black {
-      background: #2c2420;
-    }
-
-    .cell-white {
-      background: #fffdf8;
-      cursor: pointer;
-    }
-
-    .cell-number {
-      position: absolute;
-      top: 1px;
-      left: 2px;
-      font-size: 10px;
-      line-height: 1;
-      color: #2c2420;
-      pointer-events: none;
-    }
-
-    .cell-letter {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      font-size: 20px;
-      font-weight: 500;
-      color: #2c2420;
-      text-transform: uppercase;
-    }
-
-    .cell-highlight {
-      background: #f0dfc8;
-    }
-
-    .cell-active {
-      background: #d4b896;
-    }
-
-    #clues-container {
-      display: flex;
-      gap: 2rem;
-      max-height: 532px;
-      overflow: hidden;
-    }
-
-    .clues-column {
-      min-width: 200px;
-      max-width: 260px;
-    }
-
-    .clues-column h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #2c2420;
-      margin-bottom: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .clues-list {
-      max-height: 500px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .clue-item {
-      display: flex;
-      gap: 0.5rem;
-      padding: 0.35rem 0.5rem;
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      color: #4a3f35;
-    }
-
-    .clue-item:hover {
-      background: #f0ebe0;
-    }
-
-    .clue-number {
-      font-weight: 700;
-      min-width: 1.5em;
-      color: #2c2420;
-    }
-
-    .clue-active {
-      background: #f0dfc8;
-    }
-
-    .clue-active:hover {
-      background: #f0dfc8;
-    }
-
-    @keyframes confetti-fall {
-      0% {
-        transform: translateY(-20px) translateX(0) rotate(0deg);
-        opacity: 1;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crux</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-      25% {
-        transform: translateY(27vh) translateX(15px) rotate(180deg);
-        opacity: 1;
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #faf7f2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 4rem 2rem 2rem;
       }
-      50% {
-        transform: translateY(55vh) translateX(-10px) rotate(360deg);
-        opacity: 1;
+
+      header {
+        margin-bottom: 1.5rem;
       }
-      75% {
-        transform: translateY(82vh) translateX(12px) rotate(540deg);
-        opacity: 1;
+
+      h1 {
+        font-family: Georgia, serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        color: #2c2420;
       }
-      100% {
-        transform: translateY(110vh) translateX(-5px) rotate(720deg);
+
+      .subtitle {
+        font-size: 0.85rem;
+        color: #a08060;
+        text-align: center;
+        margin-top: 0.25rem;
+      }
+
+      main {
+        display: flex;
+        gap: 2rem;
+      }
+
+      #grid-container {
+        display: grid;
+        gap: 0;
+        border: 2px solid #2c2420;
+        background: #2c2420;
+        width: fit-content;
+      }
+
+      .cell {
+        width: 44px;
+        height: 44px;
+        position: relative;
+        border: 1px solid #2c2420;
+      }
+
+      .cell-black {
+        background: #2c2420;
+      }
+
+      .cell-white {
+        background: #fffdf8;
+        cursor: pointer;
+      }
+
+      .cell-number {
+        position: absolute;
+        top: 1px;
+        left: 2px;
+        font-size: 10px;
+        line-height: 1;
+        color: #2c2420;
+        pointer-events: none;
+      }
+
+      .cell-letter {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        font-size: 20px;
+        font-weight: 500;
+        color: #2c2420;
+        text-transform: uppercase;
+      }
+
+      .cell-highlight {
+        background: #f0dfc8;
+      }
+
+      .cell-active {
+        background: #d4b896;
+      }
+
+      #clues-container {
+        display: flex;
+        gap: 2rem;
+        max-height: 532px;
+        overflow: hidden;
+      }
+
+      .clues-column {
+        min-width: 240px;
+        max-width: 320px;
+      }
+
+      .clues-column h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #2c2420;
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      .clues-list {
+        max-height: 500px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .clue-item {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.35rem 0.5rem;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: #4a3f35;
+      }
+
+      .clue-item:hover {
+        background: #f0ebe0;
+      }
+
+      .clue-number {
+        font-weight: 700;
+        min-width: 1.5em;
+        color: #2c2420;
+      }
+
+      .clue-active {
+        background: #f0dfc8;
+      }
+
+      .clue-active:hover {
+        background: #f0dfc8;
+      }
+
+      @keyframes confetti-fall {
+        0% {
+          transform: translateY(-20px) translateX(0) rotate(0deg);
+          opacity: 1;
+        }
+        25% {
+          transform: translateY(27vh) translateX(15px) rotate(180deg);
+          opacity: 1;
+        }
+        50% {
+          transform: translateY(55vh) translateX(-10px) rotate(360deg);
+          opacity: 1;
+        }
+        75% {
+          transform: translateY(82vh) translateX(12px) rotate(540deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(110vh) translateX(-5px) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      .confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 1000;
+      }
+
+      .confetti-particle {
+        position: absolute;
+        top: -20px;
+        border-radius: 2px;
+        animation: confetti-fall linear forwards;
+      }
+
+      .celebration-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
         opacity: 0;
+        transition: opacity 600ms ease;
       }
-    }
 
-    .confetti-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 1000;
-    }
+      .celebration-backdrop.visible {
+        opacity: 1;
+      }
 
-    .confetti-particle {
-      position: absolute;
-      top: -20px;
-      border-radius: 2px;
-      animation: confetti-fall linear forwards;
-    }
+      .celebration-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 2.5rem 3rem;
+        max-width: 620px;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      }
 
-    .celebration-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1001;
-      opacity: 0;
-      transition: opacity 600ms ease;
-    }
+      .celebration-header {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c2420;
+        margin-bottom: 1rem;
+      }
 
-    .celebration-backdrop.visible {
-      opacity: 1;
-    }
+      .celebration-message {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #4a3f35;
+        white-space: pre-line;
+      }
 
-    .celebration-card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 2.5rem 3rem;
-      max-width: 480px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    }
+      .celebration-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+      }
 
-    .celebration-header {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #2c2420;
-      margin-bottom: 1rem;
-    }
+      .celebration-btn {
+        padding: 0.6rem 1.5rem;
+        border-radius: 6px;
+        border: none;
+        font-size: 0.95rem;
+        cursor: pointer;
+        font-weight: 600;
+      }
 
-    .celebration-message {
-      font-size: 1.1rem;
-      line-height: 1.6;
-      color: #4a3f35;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Crux</h1>
-    <p class="subtitle">⋆ 5 Jaar ⋆</p>
-  </header>
-  <main>
-    <div id="grid-container"></div>
-    <div id="clues-container">
-      <div class="clues-column">
-        <h2>Horizontaal</h2>
-        <div id="clues-horizontal" class="clues-list"></div>
+      .btn-close {
+        background: #2c2420;
+        color: #fffdf8;
+      }
+
+      .btn-close:hover {
+        background: #4a3f35;
+      }
+
+      .btn-reset {
+        background: transparent;
+        color: #a08060;
+        border: 1px solid #a08060;
+      }
+
+      .btn-reset:hover {
+        background: #f0ebe0;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Paubella Crux</h1>
+      <p class="subtitle">⋆ 5 Jaar Anniversary puzzel ⋆</p>
+      <p class="subtitle">⋆ 30 mei 2026 ⋆</p>
+    </header>
+    <main>
+      <div id="grid-container"></div>
+      <div id="clues-container">
+        <div class="clues-column">
+          <h2>Horizontaal</h2>
+          <div id="clues-horizontal" class="clues-list"></div>
+        </div>
+        <div class="clues-column">
+          <h2>Verticaal</h2>
+          <div id="clues-vertical" class="clues-list"></div>
+        </div>
       </div>
-      <div class="clues-column">
-        <h2>Verticaal</h2>
-        <div id="clues-vertical" class="clues-list"></div>
-      </div>
-    </div>
-  </main>
-  <script>
-    function parseGrid(textRows) {
-      return {
-        grid: textRows.map(row =>
-          [...row].map(ch => ch === '#' ? null : '')
-        ),
-        solution: textRows.map(row =>
-          [...row].map(ch => ch === '#' ? null : ch)
-        ),
-      };
-    }
+    </main>
+    <script>
+      function parseGrid(textRows) {
+        return {
+          grid: textRows.map((row) =>
+            [...row].map((ch) => (ch === "#" ? null : "")),
+          ),
+          solution: textRows.map((row) =>
+            [...row].map((ch) => (ch === "#" ? null : ch)),
+          ),
+        };
+      }
 
-    function detectWords(grid, rows, cols) {
-      const words = [];
-      for (let r = 0; r < rows; r++) {
-        let start = null;
-        for (let c = 0; c <= cols; c++) {
-          if (c < cols && grid[r][c] !== null) {
-            if (start === null) start = c;
-          } else {
-            if (start !== null && c - start >= 2) {
-              words.push({ direction: 'horizontal', row: r, col: start, length: c - start });
+      function detectWords(grid, rows, cols) {
+        const words = [];
+        for (let r = 0; r < rows; r++) {
+          let start = null;
+          for (let c = 0; c <= cols; c++) {
+            if (c < cols && grid[r][c] !== null) {
+              if (start === null) start = c;
+            } else {
+              if (start !== null && c - start >= 2) {
+                words.push({
+                  direction: "horizontal",
+                  row: r,
+                  col: start,
+                  length: c - start,
+                });
+              }
+              start = null;
             }
-            start = null;
           }
         }
-      }
-      for (let c = 0; c < cols; c++) {
-        let start = null;
-        for (let r = 0; r <= rows; r++) {
-          if (r < rows && grid[r][c] !== null) {
-            if (start === null) start = r;
-          } else {
-            if (start !== null && r - start >= 2) {
-              words.push({ direction: 'vertical', row: start, col: c, length: r - start });
+        for (let c = 0; c < cols; c++) {
+          let start = null;
+          for (let r = 0; r <= rows; r++) {
+            if (r < rows && grid[r][c] !== null) {
+              if (start === null) start = r;
+            } else {
+              if (start !== null && r - start >= 2) {
+                words.push({
+                  direction: "vertical",
+                  row: start,
+                  col: c,
+                  length: r - start,
+                });
+              }
+              start = null;
             }
-            start = null;
           }
         }
-      }
-      return words;
-    }
-
-    function assignNumbers(words) {
-      const starts = new Map();
-      let num = 1;
-      const sorted = [...words].sort((a, b) => a.row - b.row || a.col - b.col);
-      for (const word of sorted) {
-        const key = `${word.row},${word.col}`;
-        if (!starts.has(key)) {
-          starts.set(key, num++);
-        }
-        word.number = starts.get(key);
-      }
-      return sorted;
-    }
-
-    function buildClues(numberedWords, clueTexts) {
-      const clues = { horizontal: [], vertical: [] };
-      for (const word of numberedWords) {
-        const text = clueTexts[word.direction][word.number];
-        if (!text) {
-          console.error(`Missing clue: ${word.direction} ${word.number} at (${word.row},${word.col}), length ${word.length}`);
-          continue;
-        }
-        clues[word.direction].push({
-          number: word.number,
-          row: word.row,
-          col: word.col,
-          length: word.length,
-          direction: word.direction,
-          clue: text,
-        });
-      }
-      return clues;
-    }
-
-    function validatePuzzle(puzzle) {
-      const errors = [];
-
-      if (puzzle.grid.length !== puzzle.rows) {
-        errors.push(`Grid has ${puzzle.grid.length} rows, expected ${puzzle.rows}`);
-      }
-      if (!puzzle.grid.every(row => row.length === puzzle.cols)) {
-        errors.push(`Not all grid rows have ${puzzle.cols} columns`);
-      }
-      if (puzzle.solution.length !== puzzle.rows) {
-        errors.push(`Solution has ${puzzle.solution.length} rows, expected ${puzzle.rows}`);
-      }
-      if (!puzzle.solution.every(row => row.length === puzzle.cols)) {
-        errors.push(`Not all solution rows have ${puzzle.cols} columns`);
+        return words;
       }
 
-      for (let r = 0; r < puzzle.rows; r++) {
-        for (let c = 0; c < puzzle.cols; c++) {
-          const gridBlack = puzzle.grid[r][c] === null;
-          const solBlack = puzzle.solution[r][c] === null;
-          if (gridBlack !== solBlack) {
-            errors.push(`Black cell mismatch at (${r},${c})`);
-          }
-          if (!solBlack && !/^[A-Z]$/.test(puzzle.solution[r][c])) {
-            errors.push(`Invalid solution character "${puzzle.solution[r][c]}" at (${r},${c})`);
-          }
-        }
-      }
-
-      const detected = assignNumbers(detectWords(puzzle.grid, puzzle.rows, puzzle.cols));
-      const allClues = [...puzzle.clues.horizontal, ...puzzle.clues.vertical];
-
-      for (const word of detected) {
-        const clue = allClues.find(c =>
-          c.direction === word.direction && c.row === word.row && c.col === word.col
+      function assignNumbers(words) {
+        const starts = new Map();
+        let num = 1;
+        const sorted = [...words].sort(
+          (a, b) => a.row - b.row || a.col - b.col,
         );
-        if (!clue) {
-          errors.push(`No clue for ${word.direction} word at (${word.row},${word.col}), length ${word.length}, expected number ${word.number}`);
-        } else if (clue.length !== word.length) {
-          errors.push(`Length mismatch for ${word.direction} ${clue.number}: clue says ${clue.length}, grid has ${word.length}`);
-        } else if (clue.number !== word.number) {
-          errors.push(`Number mismatch at (${word.row},${word.col}): clue says ${clue.number}, expected ${word.number}`);
+        for (const word of sorted) {
+          const key = `${word.row},${word.col}`;
+          if (!starts.has(key)) {
+            starts.set(key, num++);
+          }
+          word.number = starts.get(key);
         }
+        return sorted;
       }
 
-      for (const clue of allClues) {
-        const match = detected.find(w =>
-          w.direction === clue.direction && w.row === clue.row && w.col === clue.col
+      function buildClues(numberedWords, clueTexts) {
+        const clues = { horizontal: [], vertical: [] };
+        for (const word of numberedWords) {
+          const text = clueTexts[word.direction][word.number];
+          if (!text) {
+            console.error(
+              `Missing clue: ${word.direction} ${word.number} at (${word.row},${word.col}), length ${word.length}`,
+            );
+            continue;
+          }
+          clues[word.direction].push({
+            number: word.number,
+            row: word.row,
+            col: word.col,
+            length: word.length,
+            direction: word.direction,
+            clue: text,
+          });
+        }
+        return clues;
+      }
+
+      function validatePuzzle(puzzle) {
+        const errors = [];
+
+        if (puzzle.grid.length !== puzzle.rows) {
+          errors.push(
+            `Grid has ${puzzle.grid.length} rows, expected ${puzzle.rows}`,
+          );
+        }
+        if (!puzzle.grid.every((row) => row.length === puzzle.cols)) {
+          errors.push(`Not all grid rows have ${puzzle.cols} columns`);
+        }
+        if (puzzle.solution.length !== puzzle.rows) {
+          errors.push(
+            `Solution has ${puzzle.solution.length} rows, expected ${puzzle.rows}`,
+          );
+        }
+        if (!puzzle.solution.every((row) => row.length === puzzle.cols)) {
+          errors.push(`Not all solution rows have ${puzzle.cols} columns`);
+        }
+
+        for (let r = 0; r < puzzle.rows; r++) {
+          for (let c = 0; c < puzzle.cols; c++) {
+            const gridBlack = puzzle.grid[r][c] === null;
+            const solBlack = puzzle.solution[r][c] === null;
+            if (gridBlack !== solBlack) {
+              errors.push(`Black cell mismatch at (${r},${c})`);
+            }
+            if (!solBlack && !/^[A-Z]$/.test(puzzle.solution[r][c])) {
+              errors.push(
+                `Invalid solution character "${puzzle.solution[r][c]}" at (${r},${c})`,
+              );
+            }
+          }
+        }
+
+        const detected = assignNumbers(
+          detectWords(puzzle.grid, puzzle.rows, puzzle.cols),
         );
-        if (!match) {
-          errors.push(`Orphan clue: ${clue.direction} ${clue.number} at (${clue.row},${clue.col}) has no matching word in grid`);
+        const allClues = [...puzzle.clues.horizontal, ...puzzle.clues.vertical];
+
+        for (const word of detected) {
+          const clue = allClues.find(
+            (c) =>
+              c.direction === word.direction &&
+              c.row === word.row &&
+              c.col === word.col,
+          );
+          if (!clue) {
+            errors.push(
+              `No clue for ${word.direction} word at (${word.row},${word.col}), length ${word.length}, expected number ${word.number}`,
+            );
+          } else if (clue.length !== word.length) {
+            errors.push(
+              `Length mismatch for ${word.direction} ${clue.number}: clue says ${clue.length}, grid has ${word.length}`,
+            );
+          } else if (clue.number !== word.number) {
+            errors.push(
+              `Number mismatch at (${word.row},${word.col}): clue says ${clue.number}, expected ${word.number}`,
+            );
+          }
         }
+
+        for (const clue of allClues) {
+          const match = detected.find(
+            (w) =>
+              w.direction === clue.direction &&
+              w.row === clue.row &&
+              w.col === clue.col,
+          );
+          if (!match) {
+            errors.push(
+              `Orphan clue: ${clue.direction} ${clue.number} at (${clue.row},${clue.col}) has no matching word in grid`,
+            );
+          }
+        }
+
+        if (errors.length > 0) {
+          console.error("Puzzle validation failed:");
+          errors.forEach((e) => console.error("  " + e));
+        } else {
+          console.log("Puzzle data validated OK");
+        }
+        return errors.length === 0;
       }
 
-      if (errors.length > 0) {
-        console.error('Puzzle validation failed:');
-        errors.forEach(e => console.error('  ' + e));
-      } else {
-        console.log('Puzzle data validated OK');
-      }
-      return errors.length === 0;
-    }
+      const { grid, solution } = parseGrid([
+        "SLOT##KIND#VI",
+        "CAFE#KAS##DAN",
+        "H###KAAS#MELK",
+        "EN#KNAP#ADS#T",
+        "RUMOURS##MES#",
+        "P#AMSTERDAM##",
+        "###B###OE###L",
+        "R#UUT##FLINKE",
+        "IN#CUE#FLOOR#",
+        "O##H###AA#MAM",
+        "JAPANS###LAS#",
+        "ARA#SIERAAD##",
+      ]);
 
-    const { grid, solution } = parseGrid([
-      'SLOT##KIND#VI',
-      'CAFE#KAS##DAN',
-      'H###KAAS#MELK',
-      'EN#KNAP#ADS#T',
-      'RUMOURS##MES#',
-      'P#AMSTERDAM##',
-      '###B###OE###L',
-      'R#UUT##FLINKE',
-      'IN#CUE#FLOOR#',
-      'O##H###AA#MAM',
-      'JAPANS###LAS#',
-      'ARA#SIERAAD##',
-    ]);
-
-    const puzzle = {
-      rows: 12,
-      cols: 13,
-      grid,
-      solution,
-      clues: buildClues(
-        assignNumbers(detectWords(grid, 12, 13)),
-        {
+      const puzzle = {
+        rows: 12,
+        cols: 13,
+        grid,
+        solution,
+        clues: buildClues(assignNumbers(detectWords(grid, 12, 13)), {
           horizontal: {
-            1: 'SLOT',
-            5: 'KIND',
-            7: 'VI',
-            9: 'CAFE',
-            10: 'KAS',
-            11: 'DAN',
-            12: 'KAAS',
-            13: 'MELK',
-            14: 'EN',
-            16: 'KNAP',
-            17: 'ADS',
-            18: 'RUMOURS',
-            20: 'MES',
-            21: 'AMSTERDAM',
-            24: 'OE',
-            27: 'UUT',
-            29: 'FLINKE',
-            33: 'IN',
-            34: 'CUE',
-            35: 'FLOOR',
-            36: 'AA',
-            37: 'MAM',
-            38: 'JAPANS',
-            43: 'LAS',
-            44: 'ARA',
-            45: 'SIERAAD',
+            1: "Vraag ik altijd over voor we gaan slapen", // SLOT
+            5: "Wil ik heeeel graag", // Kind
+            7: "Samen met 25 verticaal 👶", // VI
+            9: "Tent met taps", // CAFE
+            10: "Restaurant voor mijn 25ste", // Kas
+            11: "DAN",
+            12: "Favoriet op de borrelplank", // KAAS
+            13: "Ga ik van scheten", // MELK
+            14: "Jij _ ik", // EN
+            16: "Dat ben jij!", // KNAP
+            17: "Computer Science vak", // ADS
+            18: "Album covers", // Rumours
+            20: "Hebben we elkaar allebei een keer kado gedaan", // MES
+            21: "Waar ons huis woont", // AMSTERDAM
+            24: "Jouw favoriete stopwoordje van mij", // OE
+            27: "Halve marathon en mijn kantoor", // UUT
+            29: "Goede grootte", // Flinke
+            33: "Verbindt vriend en tiem", // In
+            34: "Annivesary resto", // CUE
+            35: "Wij zitten op de vierde", // Floor
+            36: "Gaan we zondag nodig hebben", // AA
+            37: "__ Bellen", // MAM
+            38: "Land van oorsprong van jouw 20 horizontaal", // Japans
+            43: "Joe speedboot activiteit in het verleden", // Las
+            44: "Standaard gevraagd in een zweedse puzzel", // Ara
+            45: "Een van mijn eerste kados van Pig en Hen", // Sieraad
           },
           vertical: {
-            1: 'SCHERP',
-            2: 'LA',
-            3: 'OF',
-            4: 'TE',
-            5: 'KAAPSE',
-            6: 'ISS',
-            7: 'VAL',
-            8: 'INKT',
-            10: 'KAART',
-            11: 'DESEM',
-            12: 'KNUS',
-            13: 'MDMA',
-            15: 'NU',
-            16: 'KOMBUCHA',
-            19: 'MA',
-            22: 'ROFFA',
-            23: 'DELLA',
-            25: 'LE',
-            26: 'RIOJA',
-            28: 'TU',
-            30: 'IO',
-            31: 'NOMAD',
-            32: 'KRAS',
-            39: 'AR',
-            40: 'PA',
-            41: 'NS',
-            42: 'SI',
-            43: 'LA',
+            1: "Gewenste eigenschap van 20 horizontaal", // Scherp
+            2: "Enige over van het jaren 20 tafeltje", // LA
+            3: "Een keuze", // of
+            4: "Nooit goed", // Te
+            5: "Karel die een lekker biertje is", // kaapse
+            6: "Ga je heen als je austronouten droom uitkomt", // ISS
+            7: "Jij raakte je horloge kwijt en ik een stukje van mn kin tijdens een gezamelijke __", // val
+            8: "Past voor vis en patroon", // Inkt
+            10: "Ons huis ligt west op de __ van amsterdam", // kaart
+            11: "Fave brood, isa proof en homemade", // Desem
+            12: "Ons huisje is _ en gezellig", // Knus
+            13: "Maakt ons happy op feestjes", // Mdma
+            15: "Wanneer zijn we 5 jaar samen?", // Nu
+            16: "Vind ik stinken maar wel lekker drinken", // Kombucha
+            19: "Samen met 40 verticaal je ouders", // MA
+            22: "Van __ en 22 verticaal kwamen we", // Roffa
+            23: "Van __ en 22 verticaal kwamen we", // Della
+            25: "Samen met 7 horizontaal 👶", // LE
+            26: "Fave rode wijn", // RIOJA
+            28: "Universiteit waar we inginieur zijn geworden", // TU
+            30: '"Makkelijke studie"', // IO
+            31: "Wij in Parijs", // Nomad
+            32: "Zat al snel op alles wat nieuw was in huis", // Kras
+            39: "Niet echt", // AR
+            40: "Samen met 19 verticaal je ouders", // PA
+            41: "Brengt ons overal gratis in het weekend", // NS
+            42: "Ja, geleerd in colombia", // SI
+            43: "Ciao Bel_", // LA
           },
+        }),
+      };
+
+      validatePuzzle(puzzle);
+
+      const state = {
+        direction: "horizontal",
+        cursorCell: null,
+        selectedWord: null,
+        lastClickedCell: null,
+        gridLetters: puzzle.grid.map((row) =>
+          row.map((cell) => (cell === null ? null : "")),
+        ),
+        completed: false,
+      };
+
+      function buildNumberMap(clues) {
+        const map = {};
+        for (const clue of [...clues.horizontal, ...clues.vertical]) {
+          map[`${clue.row},${clue.col}`] = clue.number;
         }
-      ),
-    };
-
-    validatePuzzle(puzzle);
-
-    const state = {
-      direction: 'horizontal',
-      cursorCell: null,
-      selectedWord: null,
-      lastClickedCell: null,
-      gridLetters: puzzle.grid.map(row =>
-        row.map(cell => cell === null ? null : '')
-      ),
-      completed: false,
-    };
-
-    function buildNumberMap(clues) {
-      const map = {};
-      for (const clue of [...clues.horizontal, ...clues.vertical]) {
-        map[`${clue.row},${clue.col}`] = clue.number;
+        return map;
       }
-      return map;
-    }
 
-    const wordLookup = buildWordLookup(puzzle);
-    const clueElements = {};
+      const wordLookup = buildWordLookup(puzzle);
+      const clueElements = {};
 
-    function buildWordLookup(puzzle) {
-      const lookup = { horizontal: {}, vertical: {} };
-      for (const clue of puzzle.clues.horizontal) {
+      function buildWordLookup(puzzle) {
+        const lookup = { horizontal: {}, vertical: {} };
+        for (const clue of puzzle.clues.horizontal) {
+          for (let i = 0; i < clue.length; i++) {
+            lookup.horizontal[`${clue.row},${clue.col + i}`] = clue;
+          }
+        }
+        for (const clue of puzzle.clues.vertical) {
+          for (let i = 0; i < clue.length; i++) {
+            lookup.vertical[`${clue.row + i},${clue.col}`] = clue;
+          }
+        }
+        return lookup;
+      }
+
+      function getCell(row, col) {
+        return document.querySelector(
+          `.cell[data-row="${row}"][data-col="${col}"]`,
+        );
+      }
+
+      function getWordCells(clue) {
+        const cells = [];
         for (let i = 0; i < clue.length; i++) {
-          lookup.horizontal[`${clue.row},${clue.col + i}`] = clue;
-        }
-      }
-      for (const clue of puzzle.clues.vertical) {
-        for (let i = 0; i < clue.length; i++) {
-          lookup.vertical[`${clue.row + i},${clue.col}`] = clue;
-        }
-      }
-      return lookup;
-    }
-
-    function getCell(row, col) {
-      return document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-    }
-
-    function getWordCells(clue) {
-      const cells = [];
-      for (let i = 0; i < clue.length; i++) {
-        if (clue.direction === 'horizontal') {
-          cells.push({ row: clue.row, col: clue.col + i });
-        } else {
-          cells.push({ row: clue.row + i, col: clue.col });
-        }
-      }
-      return cells;
-    }
-
-    function findWordAt(row, col, direction) {
-      return wordLookup[direction][`${row},${col}`] || null;
-    }
-
-    function firstEmptyCell(clue, fallback) {
-      const cells = getWordCells(clue);
-      for (const cell of cells) {
-        if (state.gridLetters[cell.row][cell.col] === '') {
-          return cell;
-        }
-      }
-      return fallback || cells[0];
-    }
-
-    function renderGrid(puzzle) {
-      const container = document.getElementById("grid-container");
-      container.style.gridTemplateColumns = `repeat(${puzzle.cols}, 44px)`;
-      container.style.gridTemplateRows = `repeat(${puzzle.rows}, 44px)`;
-
-      const numberMap = buildNumberMap(puzzle.clues);
-
-      for (let r = 0; r < puzzle.rows; r++) {
-        for (let c = 0; c < puzzle.cols; c++) {
-          const cell = document.createElement("div");
-          cell.classList.add("cell");
-          cell.dataset.row = r;
-          cell.dataset.col = c;
-
-          if (puzzle.grid[r][c] === null) {
-            cell.classList.add("cell-black");
+          if (clue.direction === "horizontal") {
+            cells.push({ row: clue.row, col: clue.col + i });
           } else {
-            cell.classList.add("cell-white");
+            cells.push({ row: clue.row + i, col: clue.col });
+          }
+        }
+        return cells;
+      }
 
-            const number = numberMap[`${r},${c}`];
-            if (number !== undefined) {
-              const numSpan = document.createElement("span");
-              numSpan.classList.add("cell-number");
-              numSpan.textContent = number;
-              cell.appendChild(numSpan);
+      function findWordAt(row, col, direction) {
+        return wordLookup[direction][`${row},${col}`] || null;
+      }
+
+      function firstEmptyCell(clue, fallback) {
+        const cells = getWordCells(clue);
+        for (const cell of cells) {
+          if (state.gridLetters[cell.row][cell.col] === "") {
+            return cell;
+          }
+        }
+        return fallback || cells[0];
+      }
+
+      function renderGrid(puzzle) {
+        const container = document.getElementById("grid-container");
+        container.style.gridTemplateColumns = `repeat(${puzzle.cols}, 44px)`;
+        container.style.gridTemplateRows = `repeat(${puzzle.rows}, 44px)`;
+
+        const numberMap = buildNumberMap(puzzle.clues);
+
+        for (let r = 0; r < puzzle.rows; r++) {
+          for (let c = 0; c < puzzle.cols; c++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+
+            if (puzzle.grid[r][c] === null) {
+              cell.classList.add("cell-black");
+            } else {
+              cell.classList.add("cell-white");
+
+              const number = numberMap[`${r},${c}`];
+              if (number !== undefined) {
+                const numSpan = document.createElement("span");
+                numSpan.classList.add("cell-number");
+                numSpan.textContent = number;
+                cell.appendChild(numSpan);
+              }
+
+              const letterSpan = document.createElement("span");
+              letterSpan.classList.add("cell-letter");
+              cell.appendChild(letterSpan);
             }
 
-            const letterSpan = document.createElement("span");
-            letterSpan.classList.add("cell-letter");
-            cell.appendChild(letterSpan);
-          }
-
-          container.appendChild(cell);
-        }
-      }
-    }
-
-    function renderClues(puzzle) {
-      const hContainer = document.getElementById('clues-horizontal');
-      const vContainer = document.getElementById('clues-vertical');
-
-      for (const clue of puzzle.clues.horizontal) {
-        const item = document.createElement('div');
-        item.classList.add('clue-item');
-        item.dataset.direction = 'horizontal';
-        item.dataset.number = clue.number;
-
-        const num = document.createElement('span');
-        num.classList.add('clue-number');
-        num.textContent = clue.number + '.';
-
-        const text = document.createElement('span');
-        text.classList.add('clue-text');
-        text.textContent = clue.clue;
-
-        item.appendChild(num);
-        item.appendChild(text);
-        hContainer.appendChild(item);
-        clueElements[`horizontal-${clue.number}`] = item;
-      }
-
-      for (const clue of puzzle.clues.vertical) {
-        const item = document.createElement('div');
-        item.classList.add('clue-item');
-        item.dataset.direction = 'vertical';
-        item.dataset.number = clue.number;
-
-        const num = document.createElement('span');
-        num.classList.add('clue-number');
-        num.textContent = clue.number + '.';
-
-        const text = document.createElement('span');
-        text.classList.add('clue-text');
-        text.textContent = clue.clue;
-
-        item.appendChild(num);
-        item.appendChild(text);
-        vContainer.appendChild(item);
-        clueElements[`vertical-${clue.number}`] = item;
-      }
-    }
-
-    function updateHighlighting() {
-      document.querySelectorAll('.cell-highlight, .cell-active').forEach(el => {
-        el.classList.remove('cell-highlight', 'cell-active');
-      });
-
-      const prevActive = document.querySelector('.clue-active');
-      if (prevActive) prevActive.classList.remove('clue-active');
-
-      if (!state.selectedWord) return;
-
-      const cells = getWordCells(state.selectedWord);
-      for (const { row, col } of cells) {
-        getCell(row, col).classList.add('cell-highlight');
-      }
-
-      if (state.cursorCell) {
-        const active = getCell(state.cursorCell.row, state.cursorCell.col);
-        active.classList.remove('cell-highlight');
-        active.classList.add('cell-active');
-      }
-
-      const key = `${state.selectedWord.direction}-${state.selectedWord.number}`;
-      const clueEl = clueElements[key];
-      if (clueEl) {
-        clueEl.classList.add('clue-active');
-        clueEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
-    }
-
-    function selectWord(row, col) {
-      const sameCell = state.lastClickedCell &&
-        state.lastClickedCell.row === row && state.lastClickedCell.col === col;
-
-      let direction = state.direction;
-
-      if (sameCell) {
-        const toggled = direction === 'horizontal' ? 'vertical' : 'horizontal';
-        if (findWordAt(row, col, toggled)) {
-          direction = toggled;
-        }
-      }
-
-      let word = findWordAt(row, col, direction);
-      if (!word) {
-        const other = direction === 'horizontal' ? 'vertical' : 'horizontal';
-        word = findWordAt(row, col, other);
-        if (word) direction = other;
-      }
-
-      if (!word) return;
-
-      state.direction = direction;
-      state.selectedWord = word;
-      state.cursorCell = firstEmptyCell(word, { row, col });
-      state.lastClickedCell = { row, col };
-      updateHighlighting();
-    }
-
-    function selectClue(clue) {
-      state.direction = clue.direction;
-      state.selectedWord = clue;
-      state.cursorCell = firstEmptyCell(clue, { row: clue.row, col: clue.col });
-      state.lastClickedCell = null;
-      updateHighlighting();
-    }
-
-    function placeLetter(letter) {
-      const { row, col } = state.cursorCell;
-      state.gridLetters[row][col] = letter;
-      getCell(row, col).querySelector('.cell-letter').textContent = letter;
-      advanceCursor();
-      checkCompletion();
-      saveProgress();
-    }
-
-    function advanceCursor() {
-      const cells = getWordCells(state.selectedWord);
-      const currentIndex = cells.findIndex(
-        c => c.row === state.cursorCell.row && c.col === state.cursorCell.col
-      );
-
-      for (let i = 1; i <= cells.length; i++) {
-        const next = cells[(currentIndex + i) % cells.length];
-        if (state.gridLetters[next.row][next.col] === '') {
-          state.cursorCell = next;
-          updateHighlighting();
-          return;
-        }
-      }
-
-      updateHighlighting();
-    }
-
-    function deleteLetter() {
-      const cells = getWordCells(state.selectedWord);
-      const currentIndex = cells.findIndex(
-        c => c.row === state.cursorCell.row && c.col === state.cursorCell.col
-      );
-
-      const { row, col } = state.cursorCell;
-
-      if (state.gridLetters[row][col] !== '') {
-        state.gridLetters[row][col] = '';
-        getCell(row, col).querySelector('.cell-letter').textContent = '';
-      } else {
-        for (let i = 1; i <= cells.length; i++) {
-          const prev = cells[(currentIndex - i + cells.length) % cells.length];
-          if (state.gridLetters[prev.row][prev.col] !== '') {
-            state.gridLetters[prev.row][prev.col] = '';
-            getCell(prev.row, prev.col).querySelector('.cell-letter').textContent = '';
-            state.cursorCell = prev;
-            break;
+            container.appendChild(cell);
           }
         }
       }
 
-      updateHighlighting();
-      saveProgress();
-    }
+      function renderClues(puzzle) {
+        const hContainer = document.getElementById("clues-horizontal");
+        const vContainer = document.getElementById("clues-vertical");
 
-    function saveProgress() {
-      localStorage.setItem('crux-progress', JSON.stringify(state.gridLetters));
-    }
+        for (const clue of puzzle.clues.horizontal) {
+          const item = document.createElement("div");
+          item.classList.add("clue-item");
+          item.dataset.direction = "horizontal";
+          item.dataset.number = clue.number;
 
-    function restoreProgress() {
-      const saved = localStorage.getItem('crux-progress');
-      if (!saved) return;
+          const num = document.createElement("span");
+          num.classList.add("clue-number");
+          num.textContent = clue.number + ".";
 
-      let parsed;
-      try {
-        parsed = JSON.parse(saved);
-      } catch (e) {
-        return;
-      }
+          const text = document.createElement("span");
+          text.classList.add("clue-text");
+          text.textContent = clue.clue;
 
-      if (!Array.isArray(parsed) || parsed.length !== puzzle.rows) return;
-      if (!parsed.every(row => Array.isArray(row) && row.length === puzzle.cols)) return;
+          item.appendChild(num);
+          item.appendChild(text);
+          hContainer.appendChild(item);
+          clueElements[`horizontal-${clue.number}`] = item;
+        }
 
-      for (let r = 0; r < puzzle.rows; r++) {
-        for (let c = 0; c < puzzle.cols; c++) {
-          if (puzzle.grid[r][c] !== null && typeof parsed[r][c] === 'string' && /^[A-Z]$/.test(parsed[r][c])) {
-            state.gridLetters[r][c] = parsed[r][c];
-            getCell(r, c).querySelector('.cell-letter').textContent = parsed[r][c];
-          }
+        for (const clue of puzzle.clues.vertical) {
+          const item = document.createElement("div");
+          item.classList.add("clue-item");
+          item.dataset.direction = "vertical";
+          item.dataset.number = clue.number;
+
+          const num = document.createElement("span");
+          num.classList.add("clue-number");
+          num.textContent = clue.number + ".";
+
+          const text = document.createElement("span");
+          text.classList.add("clue-text");
+          text.textContent = clue.clue;
+
+          item.appendChild(num);
+          item.appendChild(text);
+          vContainer.appendChild(item);
+          clueElements[`vertical-${clue.number}`] = item;
         }
       }
 
-      checkCompletion();
-    }
-
-    function checkCompletion() {
-      for (let r = 0; r < puzzle.rows; r++) {
-        for (let c = 0; c < puzzle.cols; c++) {
-          if (puzzle.grid[r][c] !== null && state.gridLetters[r][c] === '') {
-            return;
-          }
-        }
-      }
-
-      for (let r = 0; r < puzzle.rows; r++) {
-        for (let c = 0; c < puzzle.cols; c++) {
-          if (puzzle.grid[r][c] !== null && state.gridLetters[r][c] !== puzzle.solution[r][c]) {
-            return;
-          }
-        }
-      }
-
-      state.completed = true;
-      setTimeout(() => showCelebration(), 300);
-    }
-
-    function showCelebration() {
-      const confettiContainer = document.createElement('div');
-      confettiContainer.classList.add('confetti-container');
-
-      const colors = ['#FFD700', '#FF6B6B', '#FFB5C2', '#87CEEB', '#98D8AA', '#C4A7E7'];
-
-      for (let i = 0; i < 60; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('confetti-particle');
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        particle.style.width = (8 + Math.random() * 4) + 'px';
-        particle.style.height = (10 + Math.random() * 6) + 'px';
-        particle.style.animationDuration = (2 + Math.random() * 2) + 's';
-        particle.style.animationDelay = (Math.random() * 0.8) + 's';
-        confettiContainer.appendChild(particle);
-      }
-
-      document.body.appendChild(confettiContainer);
-      setTimeout(() => confettiContainer.remove(), 5000);
-
-      setTimeout(() => {
-        const backdrop = document.createElement('div');
-        backdrop.classList.add('celebration-backdrop');
-
-        const card = document.createElement('div');
-        card.classList.add('celebration-card');
-
-        const header = document.createElement('h2');
-        header.classList.add('celebration-header');
-        header.textContent = 'Puzzel opgelost!';
-
-        const message = document.createElement('p');
-        message.classList.add('celebration-message');
-        message.textContent = '[Persoonlijk bericht hier]';
-
-        card.appendChild(header);
-        card.appendChild(message);
-        backdrop.appendChild(card);
-        document.body.appendChild(backdrop);
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            backdrop.classList.add('visible');
+      function updateHighlighting() {
+        document
+          .querySelectorAll(".cell-highlight, .cell-active")
+          .forEach((el) => {
+            el.classList.remove("cell-highlight", "cell-active");
           });
-        });
-      }, 500);
-    }
 
-    renderGrid(puzzle);
-    renderClues(puzzle);
-    restoreProgress();
+        const prevActive = document.querySelector(".clue-active");
+        if (prevActive) prevActive.classList.remove("clue-active");
 
-    document.getElementById('clues-container').addEventListener('click', (e) => {
-      if (state.completed) return;
-      const item = e.target.closest('.clue-item');
-      if (!item) return;
-      const direction = item.dataset.direction;
-      const number = parseInt(item.dataset.number);
-      const clue = puzzle.clues[direction].find(c => c.number === number);
-      if (clue) selectClue(clue);
-    });
+        if (!state.selectedWord) return;
 
-    document.getElementById('grid-container').addEventListener('click', (e) => {
-      if (state.completed) return;
-      const cell = e.target.closest('.cell-white');
-      if (!cell) return;
-      selectWord(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (state.completed) return;
-
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' ||
-          e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        e.preventDefault();
-
-        if (!state.selectedWord) {
-          const first = puzzle.clues.horizontal[0];
-          if (first) selectClue(first);
-          return;
+        const cells = getWordCells(state.selectedWord);
+        for (const { row, col } of cells) {
+          getCell(row, col).classList.add("cell-highlight");
         }
 
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-          const clueList = puzzle.clues[state.direction];
-          const currentIndex = clueList.findIndex(
-            c => c.number === state.selectedWord.number && c.direction === state.selectedWord.direction
-          );
-          let nextIndex;
-          if (e.key === 'ArrowRight') {
-            nextIndex = (currentIndex + 1) % clueList.length;
-          } else {
-            nextIndex = (currentIndex - 1 + clueList.length) % clueList.length;
+        if (state.cursorCell) {
+          const active = getCell(state.cursorCell.row, state.cursorCell.col);
+          active.classList.remove("cell-highlight");
+          active.classList.add("cell-active");
+        }
+
+        const key = `${state.selectedWord.direction}-${state.selectedWord.number}`;
+        const clueEl = clueElements[key];
+        if (clueEl) {
+          clueEl.classList.add("clue-active");
+          clueEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+      }
+
+      function selectWord(row, col) {
+        const sameCell =
+          state.lastClickedCell &&
+          state.lastClickedCell.row === row &&
+          state.lastClickedCell.col === col;
+
+        let direction = state.direction;
+
+        if (sameCell) {
+          const toggled =
+            direction === "horizontal" ? "vertical" : "horizontal";
+          if (findWordAt(row, col, toggled)) {
+            direction = toggled;
           }
-          selectClue(clueList[nextIndex]);
+        }
+
+        let word = findWordAt(row, col, direction);
+        if (!word) {
+          const other = direction === "horizontal" ? "vertical" : "horizontal";
+          word = findWordAt(row, col, other);
+          if (word) direction = other;
+        }
+
+        if (!word) return;
+
+        state.direction = direction;
+        state.selectedWord = word;
+        state.cursorCell = firstEmptyCell(word, { row, col });
+        state.lastClickedCell = { row, col };
+        updateHighlighting();
+      }
+
+      function selectClue(clue) {
+        state.direction = clue.direction;
+        state.selectedWord = clue;
+        state.cursorCell = firstEmptyCell(clue, {
+          row: clue.row,
+          col: clue.col,
+        });
+        state.lastClickedCell = null;
+        updateHighlighting();
+      }
+
+      function placeLetter(letter) {
+        const { row, col } = state.cursorCell;
+        state.gridLetters[row][col] = letter;
+        getCell(row, col).querySelector(".cell-letter").textContent = letter;
+        advanceCursor();
+        checkCompletion();
+        saveProgress();
+      }
+
+      function advanceCursor() {
+        const cells = getWordCells(state.selectedWord);
+        const currentIndex = cells.findIndex(
+          (c) =>
+            c.row === state.cursorCell.row && c.col === state.cursorCell.col,
+        );
+
+        for (let i = 1; i <= cells.length; i++) {
+          const next = cells[(currentIndex + i) % cells.length];
+          if (state.gridLetters[next.row][next.col] === "") {
+            state.cursorCell = next;
+            updateHighlighting();
+            return;
+          }
+        }
+
+        updateHighlighting();
+      }
+
+      function deleteLetter() {
+        const cells = getWordCells(state.selectedWord);
+        const currentIndex = cells.findIndex(
+          (c) =>
+            c.row === state.cursorCell.row && c.col === state.cursorCell.col,
+        );
+
+        const { row, col } = state.cursorCell;
+
+        if (state.gridLetters[row][col] !== "") {
+          state.gridLetters[row][col] = "";
+          getCell(row, col).querySelector(".cell-letter").textContent = "";
         } else {
-          const newDirection = state.direction === 'horizontal' ? 'vertical' : 'horizontal';
-          const word = findWordAt(state.cursorCell.row, state.cursorCell.col, newDirection);
-          if (word) {
-            state.direction = newDirection;
-            selectClue(word);
-          } else {
-            const first = puzzle.clues[newDirection][0];
-            if (first) {
-              state.direction = newDirection;
-              selectClue(first);
+          for (let i = 1; i <= cells.length; i++) {
+            const prev =
+              cells[(currentIndex - i + cells.length) % cells.length];
+            if (state.gridLetters[prev.row][prev.col] !== "") {
+              state.gridLetters[prev.row][prev.col] = "";
+              getCell(prev.row, prev.col).querySelector(
+                ".cell-letter",
+              ).textContent = "";
+              state.cursorCell = prev;
+              break;
             }
           }
         }
-        return;
+
+        updateHighlighting();
+        saveProgress();
       }
 
-      if (!state.selectedWord || !state.cursorCell) return;
-
-      const key = e.key.toUpperCase();
-      if (key.length === 1 && key >= 'A' && key <= 'Z') {
-        e.preventDefault();
-        placeLetter(key);
-      } else if (e.key === 'Backspace') {
-        e.preventDefault();
-        deleteLetter();
+      function saveProgress() {
+        localStorage.setItem(
+          "crux-progress",
+          JSON.stringify(state.gridLetters),
+        );
       }
-    });
-  </script>
-</body>
+
+      function restoreProgress() {
+        const saved = localStorage.getItem("crux-progress");
+        if (!saved) return;
+
+        let parsed;
+        try {
+          parsed = JSON.parse(saved);
+        } catch (e) {
+          return;
+        }
+
+        if (!Array.isArray(parsed) || parsed.length !== puzzle.rows) return;
+        if (
+          !parsed.every(
+            (row) => Array.isArray(row) && row.length === puzzle.cols,
+          )
+        )
+          return;
+
+        for (let r = 0; r < puzzle.rows; r++) {
+          for (let c = 0; c < puzzle.cols; c++) {
+            if (
+              puzzle.grid[r][c] !== null &&
+              typeof parsed[r][c] === "string" &&
+              /^[A-Z]$/.test(parsed[r][c])
+            ) {
+              state.gridLetters[r][c] = parsed[r][c];
+              getCell(r, c).querySelector(".cell-letter").textContent =
+                parsed[r][c];
+            }
+          }
+        }
+
+        checkCompletion();
+      }
+
+      function checkCompletion() {
+        for (let r = 0; r < puzzle.rows; r++) {
+          for (let c = 0; c < puzzle.cols; c++) {
+            if (puzzle.grid[r][c] !== null && state.gridLetters[r][c] === "") {
+              return;
+            }
+          }
+        }
+
+        for (let r = 0; r < puzzle.rows; r++) {
+          for (let c = 0; c < puzzle.cols; c++) {
+            if (
+              puzzle.grid[r][c] !== null &&
+              state.gridLetters[r][c] !== puzzle.solution[r][c]
+            ) {
+              return;
+            }
+          }
+        }
+
+        state.completed = true;
+        setTimeout(() => showCelebration(), 300);
+      }
+
+      function showCelebration() {
+        const confettiContainer = document.createElement("div");
+        confettiContainer.classList.add("confetti-container");
+
+        const colors = [
+          "#FFD700",
+          "#FF6B6B",
+          "#FFB5C2",
+          "#87CEEB",
+          "#98D8AA",
+          "#C4A7E7",
+        ];
+
+        for (let i = 0; i < 150; i++) {
+          const particle = document.createElement("div");
+          particle.classList.add("confetti-particle");
+          particle.style.left = Math.random() * 100 + "%";
+          particle.style.backgroundColor =
+            colors[Math.floor(Math.random() * colors.length)];
+          particle.style.width = 8 + Math.random() * 4 + "px";
+          particle.style.height = 10 + Math.random() * 6 + "px";
+          particle.style.animationDuration = 2 + Math.random() * 2 + "s";
+          particle.style.animationDelay = Math.random() * 0.8 + "s";
+          confettiContainer.appendChild(particle);
+        }
+
+        document.body.appendChild(confettiContainer);
+        setTimeout(() => confettiContainer.remove(), 5000);
+
+        setTimeout(() => {
+          const backdrop = document.createElement("div");
+          backdrop.classList.add("celebration-backdrop");
+
+          const card = document.createElement("div");
+          card.classList.add("celebration-card");
+
+          const header = document.createElement("h2");
+          header.classList.add("celebration-header");
+          header.textContent = "Yaaaay!!! Anniversary puzzel opgelost!";
+
+          const message = document.createElement("p");
+          message.classList.add("celebration-message");
+          message.textContent =
+            "Deze puzzel bevat allemaal verwijzingen naar onze relatie en ons samen zijn. Inmiddels al 5 jaar!! Echt bizar en bijzonder dat het al zo lang is. Dit jaar ook nog een hele mooie stap gezet samen door het kopen van ons huisje en verhuizen naar Amsterdam. Dat was echt weer even next level.\n\nIk wil je graag laten weten dat ik heel gelukkig ben met je. In de leuke tijden maar in de mindere tijden. We doen heel veel leuke dingen en het is altijd gezellig. Maar je kan er ook heel goed mee om gaan als ik weer eens ongezellig ben of last heb van een van mn kwaaltjes. Ik hoop dat we voor altijd samen blijven en dat ik bij 10 jaar weer een nieuwe puzzel kan maken!! \n\nIn de puzzel zaten ook een aantal hints naar het kado. Ik hoop dat je het leuk vindt!\n\nIk hou van je <3";
+
+          const buttons = document.createElement("div");
+          buttons.classList.add("celebration-buttons");
+
+          const closeBtn = document.createElement("button");
+          closeBtn.classList.add("celebration-btn", "btn-close");
+          closeBtn.textContent = "Sluiten";
+          closeBtn.addEventListener("click", () => backdrop.remove());
+
+          const resetBtn = document.createElement("button");
+          resetBtn.classList.add("celebration-btn", "btn-reset");
+          resetBtn.textContent = "Opnieuw spelen";
+          resetBtn.addEventListener("click", () => {
+            backdrop.remove();
+            resetPuzzle();
+          });
+
+          buttons.appendChild(closeBtn);
+          buttons.appendChild(resetBtn);
+
+          card.appendChild(header);
+          card.appendChild(message);
+          card.appendChild(buttons);
+          backdrop.appendChild(card);
+          document.body.appendChild(backdrop);
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              backdrop.classList.add("visible");
+            });
+          });
+        }, 500);
+      }
+
+      function resetPuzzle() {
+        state.completed = false;
+        state.direction = "horizontal";
+        state.cursorCell = null;
+        state.selectedWord = null;
+        state.lastClickedCell = null;
+        for (let r = 0; r < puzzle.rows; r++) {
+          for (let c = 0; c < puzzle.cols; c++) {
+            if (puzzle.grid[r][c] !== null) {
+              state.gridLetters[r][c] = "";
+              getCell(r, c).querySelector(".cell-letter").textContent = "";
+            }
+          }
+        }
+        updateHighlighting();
+        localStorage.removeItem("crux-progress");
+      }
+
+      renderGrid(puzzle);
+      renderClues(puzzle);
+      restoreProgress();
+
+      document
+        .getElementById("clues-container")
+        .addEventListener("click", (e) => {
+          if (state.completed) return;
+          const item = e.target.closest(".clue-item");
+          if (!item) return;
+          const direction = item.dataset.direction;
+          const number = parseInt(item.dataset.number);
+          const clue = puzzle.clues[direction].find((c) => c.number === number);
+          if (clue) selectClue(clue);
+        });
+
+      document
+        .getElementById("grid-container")
+        .addEventListener("click", (e) => {
+          if (state.completed) return;
+          const cell = e.target.closest(".cell-white");
+          if (!cell) return;
+          selectWord(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
+        });
+
+      document.addEventListener("keydown", (e) => {
+        if (state.completed) return;
+
+        if (
+          e.key === "ArrowLeft" ||
+          e.key === "ArrowRight" ||
+          e.key === "ArrowUp" ||
+          e.key === "ArrowDown"
+        ) {
+          e.preventDefault();
+
+          if (!state.selectedWord) {
+            const first = puzzle.clues.horizontal[0];
+            if (first) selectClue(first);
+            return;
+          }
+
+          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            const clueList = puzzle.clues[state.direction];
+            const currentIndex = clueList.findIndex(
+              (c) =>
+                c.number === state.selectedWord.number &&
+                c.direction === state.selectedWord.direction,
+            );
+            let nextIndex;
+            if (e.key === "ArrowRight") {
+              nextIndex = (currentIndex + 1) % clueList.length;
+            } else {
+              nextIndex =
+                (currentIndex - 1 + clueList.length) % clueList.length;
+            }
+            selectClue(clueList[nextIndex]);
+          } else {
+            const newDirection =
+              state.direction === "horizontal" ? "vertical" : "horizontal";
+            const word = findWordAt(
+              state.cursorCell.row,
+              state.cursorCell.col,
+              newDirection,
+            );
+            if (word) {
+              state.direction = newDirection;
+              selectClue(word);
+            } else {
+              const first = puzzle.clues[newDirection][0];
+              if (first) {
+                state.direction = newDirection;
+                selectClue(first);
+              }
+            }
+          }
+          return;
+        }
+
+        if (!state.selectedWord || !state.cursorCell) return;
+
+        const key = e.key.toUpperCase();
+        if (key.length === 1 && key >= "A" && key <= "Z") {
+          e.preventDefault();
+          placeLetter(key);
+        } else if (e.key === "Backspace") {
+          e.preventDefault();
+          deleteLetter();
+        }
+      });
+    </script>
+  </body>
 </html>
