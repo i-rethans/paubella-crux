@@ -371,6 +371,9 @@
         el.classList.remove('cell-highlight', 'cell-active');
       });
 
+      const prevActive = document.querySelector('.clue-active');
+      if (prevActive) prevActive.classList.remove('clue-active');
+
       if (!state.selectedWord) return;
 
       const cells = getWordCells(state.selectedWord);
@@ -382,6 +385,13 @@
         const active = getCell(state.cursorCell.row, state.cursorCell.col);
         active.classList.remove('cell-highlight');
         active.classList.add('cell-active');
+      }
+
+      const key = `${state.selectedWord.direction}-${state.selectedWord.number}`;
+      const clueEl = clueElements[key];
+      if (clueEl) {
+        clueEl.classList.add('clue-active');
+        clueEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
     }
 
