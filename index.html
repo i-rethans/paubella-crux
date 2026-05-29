@@ -303,12 +303,47 @@
       updateHighlighting();
     }
 
+    function placeLetter(letter) {
+      const { row, col } = state.cursorCell;
+      state.gridLetters[row][col] = letter;
+      getCell(row, col).querySelector('.cell-letter').textContent = letter;
+      advanceCursor();
+    }
+
+    function advanceCursor() {
+      const cells = getWordCells(state.selectedWord);
+      const currentIndex = cells.findIndex(
+        c => c.row === state.cursorCell.row && c.col === state.cursorCell.col
+      );
+
+      for (let i = 1; i <= cells.length; i++) {
+        const next = cells[(currentIndex + i) % cells.length];
+        if (state.gridLetters[next.row][next.col] === '') {
+          state.cursorCell = next;
+          updateHighlighting();
+          return;
+        }
+      }
+
+      updateHighlighting();
+    }
+
     renderGrid(puzzle);
 
     document.getElementById('grid-container').addEventListener('click', (e) => {
       const cell = e.target.closest('.cell-white');
       if (!cell) return;
       selectWord(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!state.selectedWord || !state.cursorCell) return;
+
+      const key = e.key.toUpperCase();
+      if (key.length === 1 && key >= 'A' && key <= 'Z') {
+        e.preventDefault();
+        placeLetter(key);
+      }
     });
   </script>
 </body>
