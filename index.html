@@ -237,6 +237,7 @@
     }
 
     const wordLookup = buildWordLookup(puzzle);
+    const clueElements = {};
 
     function buildWordLookup(puzzle) {
       const lookup = { horizontal: {}, vertical: {} };
@@ -317,6 +318,51 @@
 
           container.appendChild(cell);
         }
+      }
+    }
+
+    function renderClues(puzzle) {
+      const hContainer = document.getElementById('clues-horizontal');
+      const vContainer = document.getElementById('clues-vertical');
+
+      for (const clue of puzzle.clues.horizontal) {
+        const item = document.createElement('div');
+        item.classList.add('clue-item');
+        item.dataset.direction = 'horizontal';
+        item.dataset.number = clue.number;
+
+        const num = document.createElement('span');
+        num.classList.add('clue-number');
+        num.textContent = clue.number + '.';
+
+        const text = document.createElement('span');
+        text.classList.add('clue-text');
+        text.textContent = clue.clue;
+
+        item.appendChild(num);
+        item.appendChild(text);
+        hContainer.appendChild(item);
+        clueElements[`horizontal-${clue.number}`] = item;
+      }
+
+      for (const clue of puzzle.clues.vertical) {
+        const item = document.createElement('div');
+        item.classList.add('clue-item');
+        item.dataset.direction = 'vertical';
+        item.dataset.number = clue.number;
+
+        const num = document.createElement('span');
+        num.classList.add('clue-number');
+        num.textContent = clue.number + '.';
+
+        const text = document.createElement('span');
+        text.classList.add('clue-text');
+        text.textContent = clue.clue;
+
+        item.appendChild(num);
+        item.appendChild(text);
+        vContainer.appendChild(item);
+        clueElements[`vertical-${clue.number}`] = item;
       }
     }
 
@@ -420,6 +466,7 @@
     }
 
     renderGrid(puzzle);
+    renderClues(puzzle);
 
     document.getElementById('grid-container').addEventListener('click', (e) => {
       const cell = e.target.closest('.cell-white');
