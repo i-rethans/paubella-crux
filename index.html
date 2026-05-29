@@ -138,12 +138,72 @@
     }
     console.log("Puzzle data validated OK");
 
+    for (const clue of puzzle.clues.horizontal) clue.direction = 'horizontal';
+    for (const clue of puzzle.clues.vertical) clue.direction = 'vertical';
+
+    const state = {
+      direction: 'horizontal',
+      cursorCell: null,
+      selectedWord: null,
+      lastClickedCell: null,
+      gridLetters: puzzle.grid.map(row =>
+        row.map(cell => cell === null ? null : '')
+      ),
+    };
+
     function buildNumberMap(clues) {
       const map = {};
       for (const clue of [...clues.horizontal, ...clues.vertical]) {
         map[`${clue.row},${clue.col}`] = clue.number;
       }
       return map;
+    }
+
+    const wordLookup = buildWordLookup(puzzle);
+
+    function buildWordLookup(puzzle) {
+      const lookup = { horizontal: {}, vertical: {} };
+      for (const clue of puzzle.clues.horizontal) {
+        for (let i = 0; i < clue.length; i++) {
+          lookup.horizontal[`${clue.row},${clue.col + i}`] = clue;
+        }
+      }
+      for (const clue of puzzle.clues.vertical) {
+        for (let i = 0; i < clue.length; i++) {
+          lookup.vertical[`${clue.row + i},${clue.col}`] = clue;
+        }
+      }
+      return lookup;
+    }
+
+    function getCell(row, col) {
+      return document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+    }
+
+    function getWordCells(clue) {
+      const cells = [];
+      for (let i = 0; i < clue.length; i++) {
+        if (clue.direction === 'horizontal') {
+          cells.push({ row: clue.row, col: clue.col + i });
+        } else {
+          cells.push({ row: clue.row + i, col: clue.col });
+        }
+      }
+      return cells;
+    }
+
+    function findWordAt(row, col, direction) {
+      return wordLookup[direction][`${row},${col}`] || null;
+    }
+
+    function firstEmptyCell(clue, fallback) {
+      const cells = getWordCells(clue);
+      for (const cell of cells) {
+        if (state.gridLetters[cell.row][cell.col] === '') {
+          return cell;
+        }
+      }
+      return fallback || cells[0];
     }
 
     function renderGrid(puzzle) {
