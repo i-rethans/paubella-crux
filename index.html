@@ -93,7 +93,7 @@
     #clues-container {
       display: flex;
       gap: 2rem;
-      max-height: 528px;
+      max-height: 532px;
       overflow: hidden;
     }
 
@@ -112,7 +112,7 @@
     }
 
     .clues-list {
-      max-height: 496px;
+      max-height: 500px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -307,29 +307,85 @@
     }
 
     const { grid, solution } = parseGrid([
-      '#KAT#',
-      'BOS##',
-      '#E###',
-      '#KAAS',
-      '#####',
+      'SLOT##KIND#VI',
+      'CAFE#KAS##DAN',
+      'H###KAAS#MELK',
+      'EN#KNAP#ADS#T',
+      'RUMOURS##MES#',
+      'P#AMSTERDAM##',
+      '###B###OE###L',
+      'R#UUT##FLINKE',
+      'IN#CUE#FLOOR#',
+      'O##H###AA#MAM',
+      'JAPANS###LAS#',
+      'ARA#SIERAAD##',
     ]);
 
     const puzzle = {
-      rows: 5,
-      cols: 5,
+      rows: 12,
+      cols: 13,
       grid,
       solution,
       clues: buildClues(
-        assignNumbers(detectWords(grid, 5, 5)),
+        assignNumbers(detectWords(grid, 12, 13)),
         {
           horizontal: {
-            1: 'Huisdier dat spint',
-            3: 'Gebied met veel bomen',
-            4: 'Zuivelproduct uit Gouda',
+            1: 'SLOT',
+            5: 'KIND',
+            7: 'VI',
+            9: 'CAFE',
+            10: 'KAS',
+            11: 'DAN',
+            12: 'KAAS',
+            13: 'MELK',
+            14: 'EN',
+            16: 'KNAP',
+            17: 'ADS',
+            18: 'RUMOURS',
+            20: 'MES',
+            21: 'AMSTERDAM',
+            24: 'OE',
+            27: 'UUT',
+            29: 'FLINKE',
+            33: 'IN',
+            34: 'CUE',
+            35: 'FLOOR',
+            36: 'AA',
+            37: 'MAM',
+            38: 'JAPANS',
+            43: 'LAS',
+            44: 'ARA',
+            45: 'SIERAAD',
           },
           vertical: {
-            1: 'Gebak, vaak met glazuur',
-            2: 'Restant na verbranding',
+            1: 'SCHERP',
+            2: 'LA',
+            3: 'OF',
+            4: 'TE',
+            5: 'KAAPSE',
+            6: 'ISS',
+            7: 'VAL',
+            8: 'INKT',
+            10: 'KAART',
+            11: 'DESEM',
+            12: 'KNUS',
+            13: 'MDMA',
+            15: 'NU',
+            16: 'KOMBUCHA',
+            19: 'MA',
+            22: 'ROFFA',
+            23: 'DELLA',
+            25: 'LE',
+            26: 'RIOJA',
+            28: 'TU',
+            30: 'IO',
+            31: 'NOMAD',
+            32: 'KRAS',
+            39: 'AR',
+            40: 'PA',
+            41: 'NS',
+            42: 'SI',
+            43: 'LA',
           },
         }
       ),
