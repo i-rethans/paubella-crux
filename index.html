@@ -89,6 +89,64 @@
     .cell-active {
       background: #7fb8e0;
     }
+
+    #clues-container {
+      display: flex;
+      gap: 2rem;
+      max-height: 528px;
+      overflow: hidden;
+    }
+
+    .clues-column {
+      min-width: 200px;
+      max-width: 260px;
+    }
+
+    .clues-column h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .clues-list {
+      max-height: 496px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .clue-item {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: #333;
+    }
+
+    .clue-item:hover {
+      background: #eee;
+    }
+
+    .clue-number {
+      font-weight: 700;
+      min-width: 1.5em;
+      color: #1a1a1a;
+    }
+
+    .clue-active {
+      background: #c8e0f4;
+    }
+
+    .clue-active:hover {
+      background: #c8e0f4;
+    }
   </style>
 </head>
 <body>
@@ -97,6 +155,16 @@
   </header>
   <main>
     <div id="grid-container"></div>
+    <div id="clues-container">
+      <div class="clues-column">
+        <h2>Horizontaal</h2>
+        <div id="clues-horizontal" class="clues-list"></div>
+      </div>
+      <div class="clues-column">
+        <h2>Verticaal</h2>
+        <div id="clues-vertical" class="clues-list"></div>
+      </div>
+    </div>
   </main>
   <script>
     const puzzle = {
