@@ -80,6 +80,18 @@
       color: #1a1a1a;
       text-transform: uppercase;
     }
+
+    .cell-highlight {
+      background: #c8e0f4;
+    }
+
+    .cell-active {
+      background: #7fb8e0;
+    }
+
+    .cell-white {
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -240,6 +252,25 @@
 
           container.appendChild(cell);
         }
+      }
+    }
+
+    function updateHighlighting() {
+      document.querySelectorAll('.cell-highlight, .cell-active').forEach(el => {
+        el.classList.remove('cell-highlight', 'cell-active');
+      });
+
+      if (!state.selectedWord) return;
+
+      const cells = getWordCells(state.selectedWord);
+      for (const { row, col } of cells) {
+        getCell(row, col).classList.add('cell-highlight');
+      }
+
+      if (state.cursorCell) {
+        const active = getCell(state.cursorCell.row, state.cursorCell.col);
+        active.classList.remove('cell-highlight');
+        active.classList.add('cell-active');
       }
     }
 
