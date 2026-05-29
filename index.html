@@ -328,6 +328,32 @@
       updateHighlighting();
     }
 
+    function deleteLetter() {
+      const cells = getWordCells(state.selectedWord);
+      const currentIndex = cells.findIndex(
+        c => c.row === state.cursorCell.row && c.col === state.cursorCell.col
+      );
+
+      const { row, col } = state.cursorCell;
+
+      if (state.gridLetters[row][col] !== '') {
+        state.gridLetters[row][col] = '';
+        getCell(row, col).querySelector('.cell-letter').textContent = '';
+      } else {
+        for (let i = 1; i <= cells.length; i++) {
+          const prev = cells[(currentIndex - i + cells.length) % cells.length];
+          if (state.gridLetters[prev.row][prev.col] !== '') {
+            state.gridLetters[prev.row][prev.col] = '';
+            getCell(prev.row, prev.col).querySelector('.cell-letter').textContent = '';
+            state.cursorCell = prev;
+            break;
+          }
+        }
+      }
+
+      updateHighlighting();
+    }
+
     renderGrid(puzzle);
 
     document.getElementById('grid-container').addEventListener('click', (e) => {
@@ -343,6 +369,9 @@
       if (key.length === 1 && key >= 'A' && key <= 'Z') {
         e.preventDefault();
         placeLetter(key);
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        deleteLetter();
       }
     });
   </script>
