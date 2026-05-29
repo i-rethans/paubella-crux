@@ -13,7 +13,7 @@
 
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      background: #f5f5f0;
+      background: #faf7f2;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -25,10 +25,18 @@
     }
 
     h1 {
+      font-family: Georgia, serif;
       font-size: 2rem;
       font-weight: 700;
       letter-spacing: 0.05em;
-      color: #1a1a1a;
+      color: #2c2420;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #a08060;
+      text-align: center;
+      margin-top: 0.25rem;
     }
 
     main {
@@ -39,8 +47,8 @@
     #grid-container {
       display: grid;
       gap: 0;
-      border: 2px solid #1a1a1a;
-      background: #1a1a1a;
+      border: 2px solid #2c2420;
+      background: #2c2420;
       width: fit-content;
     }
 
@@ -48,15 +56,15 @@
       width: 44px;
       height: 44px;
       position: relative;
-      border: 1px solid #1a1a1a;
+      border: 1px solid #2c2420;
     }
 
     .cell-black {
-      background: #1a1a1a;
+      background: #2c2420;
     }
 
     .cell-white {
-      background: #ffffff;
+      background: #fffdf8;
       cursor: pointer;
     }
 
@@ -66,7 +74,7 @@
       left: 2px;
       font-size: 10px;
       line-height: 1;
-      color: #1a1a1a;
+      color: #2c2420;
       pointer-events: none;
     }
 
@@ -78,16 +86,16 @@
       height: 100%;
       font-size: 20px;
       font-weight: 500;
-      color: #1a1a1a;
+      color: #2c2420;
       text-transform: uppercase;
     }
 
     .cell-highlight {
-      background: #c8e0f4;
+      background: #f0dfc8;
     }
 
     .cell-active {
-      background: #7fb8e0;
+      background: #d4b896;
     }
 
     #clues-container {
@@ -105,7 +113,7 @@
     .clues-column h2 {
       font-size: 1rem;
       font-weight: 700;
-      color: #1a1a1a;
+      color: #2c2420;
       margin-bottom: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.03em;
@@ -127,31 +135,114 @@
       cursor: pointer;
       font-size: 0.9rem;
       line-height: 1.4;
-      color: #333;
+      color: #4a3f35;
     }
 
     .clue-item:hover {
-      background: #eee;
+      background: #f0ebe0;
     }
 
     .clue-number {
       font-weight: 700;
       min-width: 1.5em;
-      color: #1a1a1a;
+      color: #2c2420;
     }
 
     .clue-active {
-      background: #c8e0f4;
+      background: #f0dfc8;
     }
 
     .clue-active:hover {
-      background: #c8e0f4;
+      background: #f0dfc8;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-20px) translateX(0) rotate(0deg);
+        opacity: 1;
+      }
+      25% {
+        transform: translateY(27vh) translateX(15px) rotate(180deg);
+        opacity: 1;
+      }
+      50% {
+        transform: translateY(55vh) translateX(-10px) rotate(360deg);
+        opacity: 1;
+      }
+      75% {
+        transform: translateY(82vh) translateX(12px) rotate(540deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) translateX(-5px) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1000;
+    }
+
+    .confetti-particle {
+      position: absolute;
+      top: -20px;
+      border-radius: 2px;
+      animation: confetti-fall linear forwards;
+    }
+
+    .celebration-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+      opacity: 0;
+      transition: opacity 600ms ease;
+    }
+
+    .celebration-backdrop.visible {
+      opacity: 1;
+    }
+
+    .celebration-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 2.5rem 3rem;
+      max-width: 480px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+
+    .celebration-header {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #2c2420;
+      margin-bottom: 1rem;
+    }
+
+    .celebration-message {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #4a3f35;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Crux</h1>
+    <p class="subtitle">⋆ 5 Jaar ⋆</p>
   </header>
   <main>
     <div id="grid-container"></div>
@@ -401,6 +492,7 @@
       gridLetters: puzzle.grid.map(row =>
         row.map(cell => cell === null ? null : '')
       ),
+      completed: false,
     };
 
     function buildNumberMap(clues) {
@@ -612,6 +704,8 @@
       state.gridLetters[row][col] = letter;
       getCell(row, col).querySelector('.cell-letter').textContent = letter;
       advanceCursor();
+      checkCompletion();
+      saveProgress();
     }
 
     function advanceCursor() {
@@ -656,12 +750,115 @@
       }
 
       updateHighlighting();
+      saveProgress();
+    }
+
+    function saveProgress() {
+      localStorage.setItem('crux-progress', JSON.stringify(state.gridLetters));
+    }
+
+    function restoreProgress() {
+      const saved = localStorage.getItem('crux-progress');
+      if (!saved) return;
+
+      let parsed;
+      try {
+        parsed = JSON.parse(saved);
+      } catch (e) {
+        return;
+      }
+
+      if (!Array.isArray(parsed) || parsed.length !== puzzle.rows) return;
+      if (!parsed.every(row => Array.isArray(row) && row.length === puzzle.cols)) return;
+
+      for (let r = 0; r < puzzle.rows; r++) {
+        for (let c = 0; c < puzzle.cols; c++) {
+          if (puzzle.grid[r][c] !== null && typeof parsed[r][c] === 'string' && /^[A-Z]$/.test(parsed[r][c])) {
+            state.gridLetters[r][c] = parsed[r][c];
+            getCell(r, c).querySelector('.cell-letter').textContent = parsed[r][c];
+          }
+        }
+      }
+
+      checkCompletion();
+    }
+
+    function checkCompletion() {
+      for (let r = 0; r < puzzle.rows; r++) {
+        for (let c = 0; c < puzzle.cols; c++) {
+          if (puzzle.grid[r][c] !== null && state.gridLetters[r][c] === '') {
+            return;
+          }
+        }
+      }
+
+      for (let r = 0; r < puzzle.rows; r++) {
+        for (let c = 0; c < puzzle.cols; c++) {
+          if (puzzle.grid[r][c] !== null && state.gridLetters[r][c] !== puzzle.solution[r][c]) {
+            return;
+          }
+        }
+      }
+
+      state.completed = true;
+      setTimeout(() => showCelebration(), 300);
+    }
+
+    function showCelebration() {
+      const confettiContainer = document.createElement('div');
+      confettiContainer.classList.add('confetti-container');
+
+      const colors = ['#FFD700', '#FF6B6B', '#FFB5C2', '#87CEEB', '#98D8AA', '#C4A7E7'];
+
+      for (let i = 0; i < 60; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('confetti-particle');
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.width = (8 + Math.random() * 4) + 'px';
+        particle.style.height = (10 + Math.random() * 6) + 'px';
+        particle.style.animationDuration = (2 + Math.random() * 2) + 's';
+        particle.style.animationDelay = (Math.random() * 0.8) + 's';
+        confettiContainer.appendChild(particle);
+      }
+
+      document.body.appendChild(confettiContainer);
+      setTimeout(() => confettiContainer.remove(), 5000);
+
+      setTimeout(() => {
+        const backdrop = document.createElement('div');
+        backdrop.classList.add('celebration-backdrop');
+
+        const card = document.createElement('div');
+        card.classList.add('celebration-card');
+
+        const header = document.createElement('h2');
+        header.classList.add('celebration-header');
+        header.textContent = 'Puzzel opgelost!';
+
+        const message = document.createElement('p');
+        message.classList.add('celebration-message');
+        message.textContent = '[Persoonlijk bericht hier]';
+
+        card.appendChild(header);
+        card.appendChild(message);
+        backdrop.appendChild(card);
+        document.body.appendChild(backdrop);
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            backdrop.classList.add('visible');
+          });
+        });
+      }, 500);
     }
 
     renderGrid(puzzle);
     renderClues(puzzle);
+    restoreProgress();
 
     document.getElementById('clues-container').addEventListener('click', (e) => {
+      if (state.completed) return;
       const item = e.target.closest('.clue-item');
       if (!item) return;
       const direction = item.dataset.direction;
@@ -671,12 +868,54 @@
     });
 
     document.getElementById('grid-container').addEventListener('click', (e) => {
+      if (state.completed) return;
       const cell = e.target.closest('.cell-white');
       if (!cell) return;
       selectWord(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
     });
 
     document.addEventListener('keydown', (e) => {
+      if (state.completed) return;
+
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' ||
+          e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+
+        if (!state.selectedWord) {
+          const first = puzzle.clues.horizontal[0];
+          if (first) selectClue(first);
+          return;
+        }
+
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          const clueList = puzzle.clues[state.direction];
+          const currentIndex = clueList.findIndex(
+            c => c.number === state.selectedWord.number && c.direction === state.selectedWord.direction
+          );
+          let nextIndex;
+          if (e.key === 'ArrowRight') {
+            nextIndex = (currentIndex + 1) % clueList.length;
+          } else {
+            nextIndex = (currentIndex - 1 + clueList.length) % clueList.length;
+          }
+          selectClue(clueList[nextIndex]);
+        } else {
+          const newDirection = state.direction === 'horizontal' ? 'vertical' : 'horizontal';
+          const word = findWordAt(state.cursorCell.row, state.cursorCell.col, newDirection);
+          if (word) {
+            state.direction = newDirection;
+            selectClue(word);
+          } else {
+            const first = puzzle.clues[newDirection][0];
+            if (first) {
+              state.direction = newDirection;
+              selectClue(first);
+            }
+          }
+        }
+        return;
+      }
+
       if (!state.selectedWord || !state.cursorCell) return;
 
       const key = e.key.toUpperCase();
