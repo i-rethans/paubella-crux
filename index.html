@@ -44,5 +44,54 @@
   <main>
     <div id="grid-container"></div>
   </main>
+  <script>
+    const puzzle = {
+      rows: 5,
+      cols: 5,
+      grid: [
+        [null, "",   "",   "",   null],
+        ["",   "",   "",   null, null],
+        [null, "",   null, null, null],
+        [null, "",   "",   "",   ""  ],
+        [null, null, null, null, null],
+      ],
+      solution: [
+        [null, "K", "A", "T", null],
+        ["B",  "O", "S", null, null],
+        [null, "E", null, null, null],
+        [null, "K", "A", "A", "S"],
+        [null, null, null, null, null],
+      ],
+      clues: {
+        horizontal: [
+          { number: 1, row: 0, col: 1, length: 3, clue: "Huisdier dat spint" },
+          { number: 3, row: 1, col: 0, length: 3, clue: "Gebied met veel bomen" },
+          { number: 4, row: 3, col: 1, length: 4, clue: "Zuivelproduct uit Gouda" },
+        ],
+        vertical: [
+          { number: 1, row: 0, col: 1, length: 4, clue: "Gebak, vaak met glazuur" },
+          { number: 2, row: 0, col: 2, length: 2, clue: "Restant na verbranding" },
+        ],
+      },
+    };
+
+    console.assert(puzzle.grid.length === puzzle.rows,
+      `Grid has ${puzzle.grid.length} rows, expected ${puzzle.rows}`);
+    console.assert(puzzle.grid.every(row => row.length === puzzle.cols),
+      `Not all grid rows have ${puzzle.cols} columns`);
+    console.assert(puzzle.solution.length === puzzle.rows,
+      `Solution has ${puzzle.solution.length} rows, expected ${puzzle.rows}`);
+    console.assert(puzzle.solution.every(row => row.length === puzzle.cols),
+      `Not all solution rows have ${puzzle.cols} columns`);
+    for (let r = 0; r < puzzle.rows; r++) {
+      for (let c = 0; c < puzzle.cols; c++) {
+        const isBlackGrid = puzzle.grid[r][c] === null;
+        const isBlackSolution = puzzle.solution[r][c] === null;
+        console.assert(isBlackGrid === isBlackSolution,
+          `Black cell mismatch at (${r},${c})`);
+      }
+    }
+    console.log("Puzzle data validated OK");
+  </script>
 </body>
 </html>
