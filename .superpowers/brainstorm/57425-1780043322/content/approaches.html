@@ -1,0 +1,63 @@
+<h2>Tech Stack Approaches</h2>
+<p class="subtitle">How to build the custom Crux puzzle — all options deploy easily to GitHub Pages</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Single HTML File (Recommended)</h3>
+      <p>One self-contained <code>index.html</code> with vanilla HTML, CSS, and JavaScript. No build step, no dependencies, no framework. Just open the file or push to GitHub Pages.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Zero setup — works immediately</li>
+          <li>Can also send as a file attachment</li>
+          <li>No build tools, no node_modules</li>
+          <li>Easy to debug and iterate</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>All code in one file (but it's a small project)</li>
+          <li>No hot-reload dev server (just refresh browser)</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Vite + TypeScript</h3>
+      <p>Lightweight dev setup with Vite for hot-reload and TypeScript for type safety. Separate files for grid logic, rendering, and interaction. Builds to static files for deployment.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Hot-reload during development</li>
+          <li>Type safety catches bugs early</li>
+          <li>Clean file separation</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Requires Node.js + npm install</li>
+          <li>Build step needed for deployment</li>
+          <li>More setup for a one-off project</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>React / Vue SPA</h3>
+      <p>Full component framework with state management. Overkill for a single hardcoded puzzle, but familiar if you use these at work.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Component-based architecture</li>
+          <li>Rich ecosystem</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Heavy for a single-page puzzle</li>
+          <li>Complex build pipeline</li>
+          <li>Unnecessary abstraction</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>
