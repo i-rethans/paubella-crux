@@ -44,7 +44,7 @@ Each puzzle lives in its own JSON file under `puzzles/`.
 | `clues.vertical`   | yes      | Object mapping answer word (uppercase) to clue text. Numbers are assigned automatically by grid position.                      |
 | `celebration`      | no       | Optional object with `title` and `message` for the completion overlay. Falls back to generic "Puzzel opgelost!" if omitted.   |
 
-The grid rows are processed by the existing `parseGrid()` function. Clue numbers and word positions are derived by `detectWords()` and `assignNumbers()`. Clues are keyed by answer word (e.g. `"SLOT"`) rather than by number — the code reads each detected word's letters from the solution grid and looks up the matching clue text. This means you never need to manually figure out clue numbering; just key each clue by the word it describes. The only constraint is that the same word cannot appear twice in the same direction within one puzzle (unlikely for personal puzzles).
+The grid rows are processed by the existing `parseGrid()` function. Clue numbers and word positions are derived by `detectWords()` and `assignNumbers()`. Clues are keyed by answer word (e.g. `"SLOT"`) rather than by number — the code reads each detected word's letters from the solution grid and looks up the matching clue text. This means you never need to manually figure out clue numbering; just key each clue by the word it describes. If the same word appears twice in the same direction (e.g. two vertical "LA" words), use `"LA"` for the first and `"LA:row,col"` (start position) for the second — e.g. `"LA:10,11"`. The code tries an exact word match first, then falls back to the position-qualified key.
 
 ## Puzzle Manifest
 
