@@ -31,17 +31,32 @@
 
       h1 {
         font-family: Georgia, serif;
-        font-size: 2rem;
+        font-size: 2.8rem;
         font-weight: 700;
         letter-spacing: 0.05em;
         color: #2c2420;
       }
 
+      #puzzle-title {
+        font-size: 1rem;
+        font-weight: 400;
+        color: #a08060;
+      }
+
+      .puzzle-name {
+        font-family: Georgia, serif;
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #2c2420;
+        margin: 0;
+      }
+
       .subtitle {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: #a08060;
         text-align: center;
-        margin-top: 0.25rem;
+        margin: 0.2rem 0 0 0;
+        letter-spacing: 0.1em;
       }
 
       main {
@@ -278,28 +293,152 @@
       .btn-reset:hover {
         background: #f0ebe0;
       }
+
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+      }
+
+      #back-link {
+        color: #a08060;
+        text-decoration: none;
+        font-size: 1rem;
+      }
+
+      #back-link:hover {
+        color: #2c2420;
+      }
+
+      #view-selection {
+        margin-top: 4rem;
+      }
+
+      #view-selection header {
+        text-align: center;
+        margin-bottom: 4rem;
+      }
+
+      #selection-content {
+        max-width: 700px;
+        width: 100%;
+      }
+
+      .puzzle-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+      }
+
+      .puzzle-card {
+        background: #fffdf8;
+        border: 2px solid #e8ddd0;
+        border-radius: 10px;
+        padding: 2rem 2.25rem;
+        cursor: pointer;
+        transition:
+          border-color 200ms,
+          box-shadow 200ms;
+      }
+
+      .puzzle-card:hover {
+        border-color: #d4b896;
+        box-shadow: 0 2px 8px rgba(44, 36, 32, 0.08);
+      }
+
+      .puzzle-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.6rem;
+      }
+
+      .puzzle-card-title {
+        font-family: Georgia, serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #2c2420;
+      }
+
+      .puzzle-card-check {
+        color: #98d8aa;
+        font-size: 1.1rem;
+      }
+
+      .puzzle-card-subtitle {
+        font-size: 0.8rem;
+        color: #a08060;
+        margin-bottom: 0.75rem;
+      }
+
+      .puzzle-card-description {
+        font-size: 0.85rem;
+        color: #4a3f35;
+        margin-bottom: 0.75rem;
+      }
+
+      .puzzle-card-progress {
+        font-size: 0.75rem;
+        color: #a08060;
+      }
+
+      .progress-bar {
+        height: 5px;
+        background: #e8ddd0;
+        border-radius: 2px;
+        margin-top: 0.35rem;
+        overflow: hidden;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        background: #d4b896;
+        border-radius: 2px;
+        transition: width 300ms;
+      }
     </style>
   </head>
   <body>
-    <header>
-      <h1>Paubella Crux</h1>
-      <p class="subtitle">⋆ 5 Jaar Anniversary puzzel ⋆</p>
-      <p class="subtitle">⋆ 30 mei 2026 ⋆</p>
-    </header>
-    <main>
-      <div id="grid-container"></div>
-      <div id="clues-container">
-        <div class="clues-column">
-          <h2>Horizontaal</h2>
-          <div id="clues-horizontal" class="clues-list"></div>
+    <div id="view-selection" style="display: none">
+      <header>
+        <h1>Paubella Crux</h1>
+      </header>
+      <main id="selection-content">
+        <p>Puzzels laden...</p>
+      </main>
+    </div>
+
+    <div id="view-puzzle" style="display: none">
+      <header>
+        <div class="header-top">
+          <a id="back-link" href="#">&larr; Puzzels</a>
+          <p class="puzzle-name" id="puzzle-subtitle-title"></p>
+          <h1 id="puzzle-title">Paubella Crux</h1>
         </div>
-        <div class="clues-column">
-          <h2>Verticaal</h2>
-          <div id="clues-vertical" class="clues-list"></div>
+        <p class="subtitle" id="puzzle-subtitle-date"></p>
+      </header>
+      <main>
+        <div id="grid-container"></div>
+        <div id="clues-container">
+          <div class="clues-column">
+            <h2>Horizontaal</h2>
+            <div id="clues-horizontal" class="clues-list"></div>
+          </div>
+          <div class="clues-column">
+            <h2>Verticaal</h2>
+            <div id="clues-vertical" class="clues-list"></div>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
     <script>
+      let puzzle = null;
+      let state = null;
+      let wordLookup = null;
+      let clueElements = {};
+      let currentPuzzleId = null;
+
       function parseGrid(textRows) {
         return {
           grid: textRows.map((row) =>
@@ -368,16 +507,31 @@
         return sorted;
       }
 
-      function buildClues(numberedWords, clueTexts) {
+      function buildClues(numberedWords, clueTexts, solution) {
         const clues = { horizontal: [], vertical: [] };
         for (const word of numberedWords) {
-          const text = clueTexts[word.direction][word.number];
+          let wordStr = "";
+          for (let i = 0; i < word.length; i++) {
+            if (word.direction === "horizontal") {
+              wordStr += solution[word.row][word.col + i];
+            } else {
+              wordStr += solution[word.row + i][word.col];
+            }
+          }
+
+          const dirClues = clueTexts[word.direction];
+          let text = dirClues[wordStr];
+          if (!text) {
+            const posKey = `${wordStr}:${word.row},${word.col}`;
+            text = dirClues[posKey];
+          }
           if (!text) {
             console.error(
-              `Missing clue: ${word.direction} ${word.number} at (${word.row},${word.col}), length ${word.length}`,
+              `Missing clue: ${word.direction} "${wordStr}" at (${word.row},${word.col}), number ${word.number}`,
             );
             continue;
           }
+
           clues[word.direction].push({
             number: word.number,
             row: word.row,
@@ -475,101 +629,6 @@
         return errors.length === 0;
       }
 
-      const { grid, solution } = parseGrid([
-        "SLOT##KIND#VI",
-        "CAFE#KAS##DAN",
-        "H###KAAS#MELK",
-        "EN#KNAP#ADS#T",
-        "RUMOURS##MES#",
-        "P#AMSTERDAM##",
-        "###B###OE###L",
-        "R#UUT##FLINKE",
-        "IN#CUE#FLOOR#",
-        "O##H###AA#MAM",
-        "JAPANS###LAS#",
-        "ARA#SIERAAD##",
-      ]);
-
-      const puzzle = {
-        rows: 12,
-        cols: 13,
-        grid,
-        solution,
-        clues: buildClues(assignNumbers(detectWords(grid, 12, 13)), {
-          horizontal: {
-            1: "Vraag ik altijd over voor we gaan slapen", // SLOT
-            5: "Wil ik heeeel graag", // Kind
-            7: "Samen met 25 verticaal 👶", // VI
-            9: "Tent met taps", // CAFE
-            10: "Restaurant voor mijn 25ste", // Kas
-            11: "Past voor ken en sen", // DAN
-            12: "Favoriet op de borrelplank", // KAAS
-            13: "Ga ik van scheten", // MELK
-            14: "Jij _ ik", // EN
-            16: "Dat ben jij!", // KNAP
-            17: "Computer Science vak", // ADS
-            18: "Album covers", // Rumours
-            20: "Hebben we elkaar allebei een keer kado gedaan", // MES
-            21: "Waar ons huis woont", // AMSTERDAM
-            24: "Jouw favoriete stopwoordje van mij", // OE
-            27: "Halve marathon en mijn kantoor", // UUT
-            29: "Goede grootte", // Flinke
-            33: "Verbindt vriend en tiem", // In
-            34: "Annivesary resto", // CUE
-            35: "Wij zitten op de vierde", // Floor
-            36: "Gaan we zondag nodig hebben", // AA
-            37: "__ Bellen", // MAM
-            38: "Land van oorsprong van jouw 20 horizontaal", // Japans
-            43: "Joe speedboot activiteit in het verleden", // Las
-            44: "Standaard gevraagd in een zweedse puzzel", // Ara
-            45: "Een van mijn eerste kados van Pig en Hen", // Sieraad
-          },
-          vertical: {
-            1: "Gewenste eigenschap van 20 horizontaal", // Scherp
-            2: "Enige over van het jaren 20 tafeltje", // LA
-            3: "Een keuze", // of
-            4: "Nooit goed", // Te
-            5: "Karel die een lekker biertje is", // kaapse
-            6: "Ga je heen als je austronouten droom uitkomt", // ISS
-            7: "Jij raakte je horloge kwijt en ik een stukje van mn kin tijdens een gezamelijke __", // val
-            8: "Past voor vis en patroon", // Inkt
-            10: "Ons huis ligt west op de __ van amsterdam", // kaart
-            11: "Fave brood, isa proof en homemade", // Desem
-            12: "Ons huisje is _ en gezellig", // Knus
-            13: "Maakt ons happy op feestjes", // Mdma
-            15: "Wanneer zijn we 5 jaar samen?", // Nu
-            16: "Vind ik stinken maar wel lekker drinken", // Kombucha
-            19: "Samen met 40 verticaal je ouders", // MA
-            22: "Van __ en 22 verticaal kwamen we", // Roffa
-            23: "Van __ en 22 verticaal kwamen we", // Della
-            25: "Samen met 7 horizontaal 👶", // LE
-            26: "Fave rode wijn", // RIOJA
-            28: "Universiteit waar we inginieur zijn geworden", // TU
-            30: '"Makkelijke studie"', // IO
-            31: "Wij in Parijs", // Nomad
-            32: "Zat al snel op alles wat nieuw was in huis", // Kras
-            39: "Niet echt", // AR
-            40: "Samen met 19 verticaal je ouders", // PA
-            41: "Brengt ons overal gratis in het weekend", // NS
-            42: "Ja, geleerd in colombia", // SI
-            43: "Ciao Bel_", // LA
-          },
-        }),
-      };
-
-      validatePuzzle(puzzle);
-
-      const state = {
-        direction: "horizontal",
-        cursorCell: null,
-        selectedWord: null,
-        lastClickedCell: null,
-        gridLetters: puzzle.grid.map((row) =>
-          row.map((cell) => (cell === null ? null : "")),
-        ),
-        completed: false,
-      };
-
       function buildNumberMap(clues) {
         const map = {};
         for (const clue of [...clues.horizontal, ...clues.vertical]) {
@@ -578,17 +637,14 @@
         return map;
       }
 
-      const wordLookup = buildWordLookup(puzzle);
-      const clueElements = {};
-
-      function buildWordLookup(puzzle) {
+      function buildWordLookup(p) {
         const lookup = { horizontal: {}, vertical: {} };
-        for (const clue of puzzle.clues.horizontal) {
+        for (const clue of p.clues.horizontal) {
           for (let i = 0; i < clue.length; i++) {
             lookup.horizontal[`${clue.row},${clue.col + i}`] = clue;
           }
         }
-        for (const clue of puzzle.clues.vertical) {
+        for (const clue of p.clues.vertical) {
           for (let i = 0; i < clue.length; i++) {
             lookup.vertical[`${clue.row + i},${clue.col}`] = clue;
           }
@@ -628,21 +684,21 @@
         return fallback || cells[0];
       }
 
-      function renderGrid(puzzle) {
+      function renderGrid(p) {
         const container = document.getElementById("grid-container");
-        container.style.gridTemplateColumns = `repeat(${puzzle.cols}, 44px)`;
-        container.style.gridTemplateRows = `repeat(${puzzle.rows}, 44px)`;
+        container.style.gridTemplateColumns = `repeat(${p.cols}, 44px)`;
+        container.style.gridTemplateRows = `repeat(${p.rows}, 44px)`;
 
-        const numberMap = buildNumberMap(puzzle.clues);
+        const numberMap = buildNumberMap(p.clues);
 
-        for (let r = 0; r < puzzle.rows; r++) {
-          for (let c = 0; c < puzzle.cols; c++) {
+        for (let r = 0; r < p.rows; r++) {
+          for (let c = 0; c < p.cols; c++) {
             const cell = document.createElement("div");
             cell.classList.add("cell");
             cell.dataset.row = r;
             cell.dataset.col = c;
 
-            if (puzzle.grid[r][c] === null) {
+            if (p.grid[r][c] === null) {
               cell.classList.add("cell-black");
             } else {
               cell.classList.add("cell-white");
@@ -665,11 +721,11 @@
         }
       }
 
-      function renderClues(puzzle) {
+      function renderClues(p) {
         const hContainer = document.getElementById("clues-horizontal");
         const vContainer = document.getElementById("clues-vertical");
 
-        for (const clue of puzzle.clues.horizontal) {
+        for (const clue of p.clues.horizontal) {
           const item = document.createElement("div");
           item.classList.add("clue-item");
           item.dataset.direction = "horizontal";
@@ -689,7 +745,7 @@
           clueElements[`horizontal-${clue.number}`] = item;
         }
 
-        for (const clue of puzzle.clues.vertical) {
+        for (const clue of p.clues.vertical) {
           const item = document.createElement("div");
           item.classList.add("clue-item");
           item.dataset.direction = "vertical";
@@ -720,7 +776,7 @@
         const prevActive = document.querySelector(".clue-active");
         if (prevActive) prevActive.classList.remove("clue-active");
 
-        if (!state.selectedWord) return;
+        if (!state || !state.selectedWord) return;
 
         const cells = getWordCells(state.selectedWord);
         for (const { row, col } of cells) {
@@ -844,14 +900,16 @@
       }
 
       function saveProgress() {
+        if (!currentPuzzleId) return;
         localStorage.setItem(
-          "crux-progress",
+          `crux-progress-${currentPuzzleId}`,
           JSON.stringify(state.gridLetters),
         );
       }
 
       function restoreProgress() {
-        const saved = localStorage.getItem("crux-progress");
+        if (!currentPuzzleId) return;
+        const saved = localStorage.getItem(`crux-progress-${currentPuzzleId}`);
         if (!saved) return;
 
         let parsed;
@@ -907,6 +965,9 @@
         }
 
         state.completed = true;
+        if (currentPuzzleId) {
+          localStorage.setItem(`crux-completed-${currentPuzzleId}`, "true");
+        }
         setTimeout(() => showCelebration(), 300);
       }
 
@@ -948,12 +1009,15 @@
 
           const header = document.createElement("h2");
           header.classList.add("celebration-header");
-          header.textContent = "Yaaaay!!! Anniversary puzzel opgelost!";
+          header.textContent = puzzle.celebration
+            ? puzzle.celebration.title
+            : "Puzzel opgelost!";
 
           const message = document.createElement("p");
           message.classList.add("celebration-message");
-          message.textContent =
-            "Deze puzzel bevat allemaal verwijzingen naar onze relatie en ons samen zijn. Inmiddels al 5 jaar!! Echt bizar en bijzonder dat het al zo lang is. Dit jaar ook nog een hele mooie stap gezet samen door het kopen van ons huisje en verhuizen naar Amsterdam. Dat was echt weer even next level.\n\nIk wil je graag laten weten dat ik heel gelukkig ben met je. In de leuke tijden maar in de mindere tijden. We doen heel veel leuke dingen en het is altijd gezellig. Maar je kan er ook heel goed mee om gaan als ik weer eens ongezellig ben of last heb van een van mn kwaaltjes. Ik hoop dat we voor altijd samen blijven en dat ik bij 10 jaar weer een nieuwe puzzel kan maken!! \n\nIn de puzzel zaten ook een aantal hints naar het kado. Ik hoop dat je het leuk vindt!\n\nIk hou van je <3";
+          message.textContent = puzzle.celebration
+            ? puzzle.celebration.message
+            : "";
 
           const buttons = document.createElement("div");
           buttons.classList.add("celebration-buttons");
@@ -1003,17 +1067,194 @@
           }
         }
         updateHighlighting();
-        localStorage.removeItem("crux-progress");
+        if (currentPuzzleId) {
+          localStorage.removeItem(`crux-progress-${currentPuzzleId}`);
+          localStorage.removeItem(`crux-completed-${currentPuzzleId}`);
+        }
       }
 
-      renderGrid(puzzle);
-      renderClues(puzzle);
-      restoreProgress();
+      function getPuzzleProgress(id) {
+        const completed = localStorage.getItem(`crux-completed-${id}`);
+        if (completed === "true")
+          return { filled: -1, total: -1, completed: true };
+
+        const saved = localStorage.getItem(`crux-progress-${id}`);
+        if (!saved) return { filled: 0, total: 0, completed: false };
+
+        let parsed;
+        try {
+          parsed = JSON.parse(saved);
+        } catch (e) {
+          return { filled: 0, total: 0, completed: false };
+        }
+
+        let filled = 0;
+        let total = 0;
+        for (const row of parsed) {
+          if (!Array.isArray(row)) continue;
+          for (const cell of row) {
+            if (cell !== null) {
+              total++;
+              if (typeof cell === "string" && /^[A-Z]$/.test(cell)) filled++;
+            }
+          }
+        }
+
+        return { filled, total, completed: false };
+      }
+
+      async function loadPuzzle(id) {
+        const gridContainer = document.getElementById("grid-container");
+        gridContainer.innerHTML = "";
+        document.getElementById("clues-horizontal").innerHTML = "";
+        document.getElementById("clues-vertical").innerHTML = "";
+        clueElements = {};
+
+        const response = await fetch(`puzzles/${id}.json`);
+        if (!response.ok) {
+          console.error(`Failed to load puzzle ${id}: ${response.status}`);
+          return;
+        }
+        const data = await response.json();
+
+        const { grid, solution } = parseGrid(data.grid);
+        const rows = data.grid.length;
+        const cols = data.grid[0].length;
+
+        const numberedWords = assignNumbers(detectWords(grid, rows, cols));
+        const clues = buildClues(numberedWords, data.clues, solution);
+
+        currentPuzzleId = id;
+        puzzle = {
+          rows,
+          cols,
+          grid,
+          solution,
+          clues,
+          celebration: data.celebration || null,
+        };
+        validatePuzzle(puzzle);
+
+        state = {
+          direction: "horizontal",
+          cursorCell: null,
+          selectedWord: null,
+          lastClickedCell: null,
+          gridLetters: grid.map((row) =>
+            row.map((cell) => (cell === null ? null : "")),
+          ),
+          completed: false,
+        };
+        wordLookup = buildWordLookup(puzzle);
+
+        document.getElementById("puzzle-title").textContent = "Paubella Crux";
+        document.getElementById("puzzle-subtitle-title").textContent =
+          data.title || "";
+        document.getElementById("puzzle-subtitle-date").textContent =
+          data.subtitle ? `⋆ ${data.subtitle} ⋆` : "";
+
+        renderGrid(puzzle);
+        renderClues(puzzle);
+        restoreProgress();
+      }
+
+      async function showSelection() {
+        document.getElementById("view-selection").style.display = "";
+        document.getElementById("view-puzzle").style.display = "none";
+
+        const content = document.getElementById("selection-content");
+
+        try {
+          const response = await fetch("puzzles/index.json");
+          const manifest = await response.json();
+
+          content.innerHTML = "";
+          const cards = document.createElement("div");
+          cards.classList.add("puzzle-cards");
+
+          for (const entry of manifest) {
+            const card = document.createElement("div");
+            card.classList.add("puzzle-card");
+            card.addEventListener("click", () => {
+              location.hash = entry.id;
+            });
+
+            const progress = getPuzzleProgress(entry.id);
+
+            const headerDiv = document.createElement("div");
+            headerDiv.classList.add("puzzle-card-header");
+
+            const title = document.createElement("span");
+            title.classList.add("puzzle-card-title");
+            title.textContent = entry.title;
+            headerDiv.appendChild(title);
+
+            if (progress.completed) {
+              const check = document.createElement("span");
+              check.classList.add("puzzle-card-check");
+              check.textContent = "✓";
+              headerDiv.appendChild(check);
+            }
+
+            card.appendChild(headerDiv);
+
+            const subtitle = document.createElement("div");
+            subtitle.classList.add("puzzle-card-subtitle");
+            subtitle.textContent = entry.subtitle;
+            card.appendChild(subtitle);
+
+            const desc = document.createElement("div");
+            desc.classList.add("puzzle-card-description");
+            desc.textContent = entry.description;
+            card.appendChild(desc);
+
+            if (!progress.completed && progress.total > 0) {
+              const progressDiv = document.createElement("div");
+              progressDiv.classList.add("puzzle-card-progress");
+              progressDiv.textContent = `${progress.filled} / ${progress.total} letters`;
+
+              const bar = document.createElement("div");
+              bar.classList.add("progress-bar");
+              const fill = document.createElement("div");
+              fill.classList.add("progress-bar-fill");
+              fill.style.width = `${Math.round((progress.filled / progress.total) * 100)}%`;
+              bar.appendChild(fill);
+              progressDiv.appendChild(bar);
+              card.appendChild(progressDiv);
+            }
+
+            cards.appendChild(card);
+          }
+
+          content.appendChild(cards);
+        } catch (e) {
+          content.innerHTML = "<p>Kon puzzels niet laden.</p>";
+          console.error("Failed to load manifest:", e);
+        }
+      }
+
+      function showPuzzleView() {
+        document.getElementById("view-selection").style.display = "none";
+        document.getElementById("view-puzzle").style.display = "";
+      }
+
+      async function route() {
+        const hash = location.hash.slice(1);
+        if (hash) {
+          await loadPuzzle(hash);
+          showPuzzleView();
+        } else {
+          await showSelection();
+        }
+      }
+
+      window.addEventListener("hashchange", route);
+      route();
 
       document
         .getElementById("clues-container")
         .addEventListener("click", (e) => {
-          if (state.completed) return;
+          if (!puzzle || state.completed) return;
           const item = e.target.closest(".clue-item");
           if (!item) return;
           const direction = item.dataset.direction;
@@ -1025,14 +1266,14 @@
       document
         .getElementById("grid-container")
         .addEventListener("click", (e) => {
-          if (state.completed) return;
+          if (!puzzle || state.completed) return;
           const cell = e.target.closest(".cell-white");
           if (!cell) return;
           selectWord(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
         });
 
       document.addEventListener("keydown", (e) => {
-        if (state.completed) return;
+        if (!puzzle || state.completed) return;
 
         if (
           e.key === "ArrowLeft" ||
